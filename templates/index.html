@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>FluidDB Explorer</title>
+
+	<link rel="stylesheet" type="text/css" href="{{ static_url("extjs/resources/css/ext-all.css") }}">
+	<link rel="stylesheet" type="text/css" href="{{ static_url("css/application.css") }}">
+
+</head>
+<body>
+
+<div id="logo"><h1>FluidDB Explorer</h1></div>
+
+<div id="welcome" class="x-hidden">
+	<h2>Welcome to FluidDB Explorer</h2>
+	<h3>What is FluidDB ?</h3>
+	<p><a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a> is an online "cloud" database. Using a flexible underlying representation of information and a new model of control, it allows users and applications to work with information more naturally. That includes dynamically organizing, sharing, combining and augmenting information, and searching in ways that have previously not been possible. It also allows users to choose exactly which information to share with whom, with separate controls for reading and writing.</p>
+	<p>FluidDB lets data be social. It allows almost unlimited information personalization by individual users and applications, and also <em>between</em> them. This makes it simple to build a wide variety of applications that benefit from cooperation, and which are open to unanticipated future enhancements. Even more importantly, FluidDB facilitates and encourages the growth of applications that leave users in control of their own data.</p>
+
+	<h3>What is FluidDB Explorer ?</h3>
+	<p>With this tool you can navigate into <a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a> using either the namespace tree or by doing queries.</p>
+
+
+	<h3>How it's built</h3>
+	<p>FluidDB Explorer uses these:</p>
+	<ul>
+		<li>FluidDB</li>
+		<li>FOM</li>
+		<li>Tornado</li>
+		<li>Python</li>
+		<li>Google App Engine</li>
+		<li>ExtJS</li>
+	</ul>
+</div>
+
+<script type="text/javascript" src="{{ static_url("extjs/adapter/ext/ext-base.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("extjs/ext-all-debug.js") }}"></script>
+
+<script type="text/javascript">
+	Ext.ns('App', 'App.Config');
+	App.Config.username = "{{ username }}";
+	App.Config.rootlabel = "{{ rootlabel }}";
+	App.Config.rootid = "{{ rootid }}";
+</script>
+
+<script type="text/javascript" src="{{ static_url("js/App.QueryField.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.MainPanel.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.ObjectPanel.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.NamespaceTree.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.TagValuesGrid.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.Login.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/App.ResultsGrid.js") }}"></script>
+<script type="text/javascript" src="{{ static_url("js/application.js") }}"></script>
+</body>
+</html>
+
