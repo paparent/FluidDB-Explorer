@@ -103,7 +103,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 		}
 
 		t.trigger.show();
-		
+
 		var re = new RegExp('^' + Ext.escapeRe(text), 'i');
 		this.filter.filterBy(function(n) {
 			return re.test(n.text);

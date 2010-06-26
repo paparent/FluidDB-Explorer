@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<project name="fluiddbexplorer" basedir="." default="build">
+	<target name="concatenate" description="Concatenate all js files">
+		<concat destfile="static/ext.js">
+			<filelist dir="static/extjs" files="adapter/ext/ext-base.js,ext-all.js" />
+		</concat>
+		<concat destfile="static/fluiddbexplorer.js">
+			<fileset dir="static/js/" includes="*.js" />
+		</concat>
+	</target>
+
+	<target name="build" depends="concatenate">
+	</target>
+</project>

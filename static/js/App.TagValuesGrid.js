@@ -19,7 +19,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			{text: 'Add a tag', handler: this.onAddTag, scope: this}
 		];
 		App.TagValuesGrid.superclass.initComponent.call(this);
-		
+
 	}
 	,afterRender: function(){
 		App.TagValuesGrid.superclass.afterRender.apply(this, arguments);
@@ -35,7 +35,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,onAfterEdit: function(e){
 		var tag = e.record.data.tag;
 		var value = e.value;
-		
+
 		Ext.Ajax.request({
 			url: '/remote/tagobject'
 			,params: {oid: this.oid, tag: tag, value: value}

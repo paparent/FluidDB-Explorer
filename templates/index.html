@@ -25,17 +25,21 @@
 	<h3>How it's built</h3>
 	<p>FluidDB Explorer uses these:</p>
 	<ul>
-		<li>FluidDB</li>
-		<li>FOM</li>
-		<li>Tornado</li>
-		<li>Python</li>
-		<li>Google App Engine</li>
-		<li>ExtJS</li>
+		<li><a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a></li>
+		<li><a href="http://bitbucket.org/aafshar/fom-main/wiki/Home" target="_blank">FOM</a></li>
+		<li><a href="http://www.extjs.com" target="_blank">ExtJS</a></li>
+		<li><a href="http://www.tornadoweb.org/" target="_blank">Tornado</a></li>
+		<li><a href="http://code.google.com/appengine/" target="_blank">Google App Engine</a></li>
+		<li><a href="http://python.org" target="_blank">Python</a></li>
 	</ul>
 </div>
 
+{% if handler.settings["debug"] %}
 <script type="text/javascript" src="{{ static_url("extjs/adapter/ext/ext-base.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("extjs/ext-all-debug.js") }}"></script>
+{% else %}
+<script type="text/javascript" src="{{ static_url("ext.js") }}"></script>
+{% end %}
 
 <script type="text/javascript">
 	Ext.ns('App', 'App.Config');
@@ -44,6 +48,7 @@
 	App.Config.rootid = "{{ rootid }}";
 </script>
 
+{% if handler.settings["debug"] %}
 <script type="text/javascript" src="{{ static_url("js/App.QueryField.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.MainPanel.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.ObjectPanel.js") }}"></script>
@@ -52,6 +57,10 @@
 <script type="text/javascript" src="{{ static_url("js/App.Login.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.ResultsGrid.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/application.js") }}"></script>
+{% else %}
+<script type="text/javascript" src="{{ static_url("fluiddbexplorer.js") }}"></script>
+{% end %}
+
 </body>
 </html>
 

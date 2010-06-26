@@ -3,7 +3,7 @@ Ext.BLANK_IMAGE_URL = '/static/extjs/resources/images/default/s.gif';
 
 Ext.onReady(function() {
 	Ext.QuickTips.init();
-	
+
 	sidePanel = new App.NamespacesTree();
 
 	var queryId = Ext.id();
