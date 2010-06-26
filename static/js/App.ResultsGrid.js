@@ -5,10 +5,6 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,loadMask: true
 	,query: null
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
-	,columns: [
-		{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid'}
-		,{header: 'About', width: 600, dataIndex: 'about'}
-	]
 	,initComponent: function(){
 		this.store = new Ext.data.JsonStore({
 			url: '/remote/query'
@@ -18,6 +14,19 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 		this.tbar = [
 			{text:'Load all about tags',scope:this,handler:this.onLoadAll}
 		];
+		this.action = new Ext.ux.grid.RowActions({
+			header: 'Actions'
+			,actions:[{iconCls:'icon-refresh',tooltip:'Load about tag'}]
+			,callbacks:{
+				'icon-refresh': this.onRefresh.createDelegate(this)
+			}
+		});
+		this.columns = [
+			{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid'}
+			,{header: 'About', width: 600, dataIndex: 'about'}
+			,this.action
+		];
+		this.plugins = [this.action];
 		App.ResultsGrid.superclass.initComponent.call(this);
 
 		if (this.query) {
@@ -35,18 +44,21 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 		Ext.getCmp('mainpanel').openObject(oid);
 	}
 	,onLoadAll: function(a){
-		function abc(r) {
-			r.set('about', '<em>loading...</em>');
-			Ext.Ajax.request({
-				url: '/remote/gettagvalue'
-				,params: {oid: r.data.oid, tag: "fluiddb/about"}
-				,success: function(a){
-					r.set('about', a.responseText);
-					r.commit();
-				}
-			});
-		}
-		this.store.each(abc);
+		this.store.each(this.setAboutTag);
+	}
+	,onRefresh: function(g, r, action, row, col){
+		this.setAboutTag(r);
+	}
+	,setAboutTag: function(r){
+		r.set('about', '<em>loading...</em>');
+		Ext.Ajax.request({
+			url: '/remote/gettagvalue'
+			,params: {oid: r.data.oid, tag: "fluiddb/about"}
+			,success: function(a){
+				r.set('about', a.responseText);
+				r.commit();
+			}
+		});
 	}
 });
 

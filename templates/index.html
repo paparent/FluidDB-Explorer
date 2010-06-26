@@ -6,6 +6,7 @@
 
 	<link rel="stylesheet" type="text/css" href="{{ static_url("extjs/resources/css/ext-all.css") }}">
 	<link rel="stylesheet" type="text/css" href="{{ static_url("css/application.css") }}">
+	<link rel="stylesheet" type="text/css" href="{{ static_url("css/Ext.ux.grid.RowActions.css") }}">
 
 </head>
 <body>
@@ -49,6 +50,7 @@
 </script>
 
 {% if handler.settings["debug"] %}
+<script type="text/javascript" src="{{ static_url("js/Ext.ux.grid.RowActions.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.QueryField.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.MainPanel.js") }}"></script>
 <script type="text/javascript" src="{{ static_url("js/App.ObjectPanel.js") }}"></script>
