@@ -23,9 +23,9 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			}
 		});
 		this.columns = [
-			{id:'tag', header:'Tag', width: 230, dataIndex: 'tag'}
+			this.action
+			,{id:'tag', header:'Tag', width: 230, dataIndex: 'tag'}
 			,{header: 'Value', width: 600, dataIndex: 'value', editor: {xtype: 'textfield'}}
-			,this.action
 		];
 		this.plugins = [this.action];
 		App.TagValuesGrid.superclass.initComponent.call(this);

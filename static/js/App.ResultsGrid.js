@@ -22,9 +22,9 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 			}
 		});
 		this.columns = [
-			{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid'}
+			this.action
+			,{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid'}
 			,{header: 'About', width: 600, dataIndex: 'about'}
-			,this.action
 		];
 		this.plugins = [this.action];
 		App.ResultsGrid.superclass.initComponent.call(this);
