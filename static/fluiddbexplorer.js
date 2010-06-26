@@ -246,6 +246,9 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 			,root: 'ids'
 			,fields: ['oid', 'about']
 		});
+		this.tbar = [
+			{text:'Load all about tags',scope:this,handler:this.onLoadAll}
+		];
 		App.ResultsGrid.superclass.initComponent.call(this);
 
 		if (this.query) {
@@ -261,6 +264,20 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 		var row = a.getSelectionModel().getSelected();
 		var oid = row.data.oid;
 		Ext.getCmp('mainpanel').openObject(oid);
+	}
+	,onLoadAll: function(a){
+		function abc(r) {
+			r.set('about', '<em>loading...</em>');
+			Ext.Ajax.request({
+				url: '/remote/gettagvalue'
+				,params: {oid: r.data.oid, tag: "fluiddb/about"}
+				,success: function(a){
+					r.set('about', a.responseText);
+					r.commit();
+				}
+			});
+		}
+		this.store.each(abc);
 	}
 });
 
