@@ -39,8 +39,6 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		}
 
 		this.on('afteredit', this.onAfterEdit, this);
-		this.on('rowdblclick', this.onRowDblClick, this);
-
 	}
 	,onAfterEdit: function(e){
 		var tag = e.record.data.tag;
@@ -50,17 +48,6 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			url: '/remote/tagobject'
 			,params: {oid: this.oid, tag: tag, value: value}
 			,success: function(a){/*TODO:...*/}
-		});
-	}
-	,onRowDblClick: function(a, b, c){
-		var row = a.getSelectionModel().getSelected();
-
-		Ext.Ajax.request({
-			url: '/remote/gettagvalue'
-			,params: {oid: this.oid, tag: row.data.tag}
-			,success: function(a){
-				Ext.Msg.alert('Value', a.responseText);
-			}
 		});
 	}
 	,onAddTag: function(){
