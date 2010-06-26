@@ -301,7 +301,8 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,fields: ['tag', 'value']
 		});
 		this.tbar = [
-			{text: 'Add a tag', handler: this.onAddTag, scope: this}
+			{text: 'Load all tag values', handler: this.onLoadAllTags, scope: this}
+			,{text: 'Add a tag', handler: this.onAddTag, scope: this}
 		];
 		App.TagValuesGrid.superclass.initComponent.call(this);
 
@@ -347,6 +348,21 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,success: function(a){this.store.reload();}
 			,scope: this
 		});
+	}
+	,onLoadAllTags: function(a){
+		oid = this.oid;
+		function abc(r) {
+			r.set('value', '<em>loading...</em>');
+			Ext.Ajax.request({
+				url: '/remote/gettagvalue'
+				,params: {oid: oid, tag: r.data.tag}
+				,success: function(a){
+					r.set('value', a.responseText);
+					r.commit();
+				}
+			});
+		}
+		this.store.each(abc);
 	}
 });
 
