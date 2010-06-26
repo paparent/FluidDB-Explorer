@@ -48,7 +48,7 @@ class SandboxHandler(tornado.web.RequestHandler):
 
         rootlabel = rootns or 'FluidDB'
         html = self.render_string("index.html", username=username,
-            rootlabel=rootlabel)
+            rootlabel=rootlabel, rootid=(rootns or 'fdbexplorer-id-root'))
         self.write(html)
 
 
