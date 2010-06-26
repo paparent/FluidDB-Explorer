@@ -149,7 +149,10 @@ class RemoteHandler(tornado.web.RequestHandler):
                 tag = self.get_argument('tag')
                 tagresponse = fluid.objects[oid][tag].get()
                 if tagresponse.content_type == PRIMITIVE_CONTENT_TYPE:
-                    value = str(tagresponse.value)
+                    if tagresponse.value is None:
+                        value = '<em>Empty</em>'
+                    else:
+                        value = str(tagresponse.value)
                 else:
                     value = '<em>(Opaque value)</em>'
                 self.write(value)
