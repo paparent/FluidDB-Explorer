@@ -3,7 +3,7 @@ import tornado.web
 import tornado.wsgi
 import wsgiref.handlers
 
-from tornado.escape import json_encode, json_decode
+from tornado.escape import json_encode
 
 from fom.session import Fluid
 from fom.db import PRIMITIVE_CONTENT_TYPE
@@ -12,44 +12,40 @@ import fom.errors
 import gmemsess
 
 
-class MainHandler(tornado.web.RequestHandler):
-    def get(self, rootns):
-        sess = gmemsess.Session(self)
+class BaseHandler(tornado.web.RequestHandler):
+    def prepare(self):
+        self.session = gmemsess.Session(self)
         try:
-            username = sess['username']
+            self.username = self.session['username']
         except KeyError:
-            username = sess['username'] = 'Anonymous'
-            sess.save()
+            self.username = self.session['username'] = 'Anonymous'
+            self.session.save()
 
-        sess['instance'] = 'main'
-        sess['base_url'] = 'http://fluiddb.fluidinfo.com'
-        sess['rootns'] = rootns or ''
-        sess.save()
-
+    def render_main(self, rootns):
         rootlabel = rootns or 'FluidDB'
-        html = self.render_string("index.html", username=username,
+        html = self.render_string("index.html", username=self.username,
             rootlabel=rootlabel, rootid=(rootns or 'fdbexplorer-id-root'))
         self.write(html)
 
 
-class SandboxHandler(tornado.web.RequestHandler):
+class MainHandler(BaseHandler):
     def get(self, rootns):
-        sess = gmemsess.Session(self)
-        try:
-            username = sess['username']
-        except KeyError:
-            username = sess['username'] = 'Anonymous'
-            sess.save()
+        self.session['instance'] = 'main'
+        self.session['base_url'] = 'https://fluiddb.fluidinfo.com'
+        self.session['rootns'] = rootns or ''
+        self.session.save()
 
-        sess['instance'] = 'sandbox'
-        sess['base_url'] = 'http://sandbox.fluidinfo.com'
-        sess['rootns'] = rootns or ''
-        sess.save()
+        self.render_main(rootns)
 
-        rootlabel = rootns or 'FluidDB'
-        html = self.render_string("index.html", username=username,
-            rootlabel=rootlabel, rootid=(rootns or 'fdbexplorer-id-root'))
-        self.write(html)
+
+class SandboxHandler(BaseHandler):
+    def get(self, rootns):
+        self.session['instance'] = 'sandbox'
+        self.session['base_url'] = 'https://sandbox.fluidinfo.com'
+        self.session['rootns'] = rootns or ''
+        self.session.save()
+
+        self.render_main(rootns)
 
 
 class RemoteHandler(tornado.web.RequestHandler):
