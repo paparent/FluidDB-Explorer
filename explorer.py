@@ -21,6 +21,24 @@ class BaseHandler(tornado.web.RequestHandler):
             self.username = self.session['username'] = 'Anonymous'
             self.session.save()
 
+    @property
+    def fluiddb_base_url(self):
+        try:
+            base_url = self.session['base_url']
+        except KeyError:
+            base_url = self.session['base_url'] = 'http://fluiddb.fluidinfo.com'
+            self.session.save()
+        return base_url
+
+    @property
+    def fluiddb_rootns(self):
+        try:
+            rootns = self.session['rootns']
+        except KeyError:
+            rootns = self.session['rootns'] = ''
+            self.session.save()
+        return rootns
+
     def render_main(self, rootns):
         rootlabel = rootns or 'FluidDB'
         html = self.render_string("index.html", username=self.username,
@@ -48,19 +66,13 @@ class SandboxHandler(BaseHandler):
         self.render_main(rootns)
 
 
-class RemoteHandler(tornado.web.RequestHandler):
+class RemoteHandler(BaseHandler):
     def post(self, action):
-        sess = gmemsess.Session(self)
-        try:
-            base_url = sess['base_url']
-        except KeyError:
-            base_url = 'http://fluiddb.fluidinfo.com'
-
-        fluid = Fluid(base_url)
+        fluid = Fluid(self.fluiddb_base_url)
 
         try:
-            sess_username = sess['username']
-            sess_password = sess['password']
+            sess_username = self.session['username']
+            sess_password = self.session['password']
             fluid.login(sess_username, sess_password)
         except KeyError:
             pass
@@ -68,15 +80,8 @@ class RemoteHandler(tornado.web.RequestHandler):
         if action == 'namespacesfetch':
             namespace = self.get_argument('node')
             if namespace == 'fdbexplorer-id-root':
-                try:
-                    rootns = sess['rootns']
-                    namespace = rootns
-                    if rootns == '':
-                        path = ''
-                    else:
-                        path = rootns + '/'
-                except KeyError:
-                    namespace = path = rootns = ''
+                namespace = self.fluiddb_rootns
+                path = '' if namespace == '' else namespace + '/'
             else:
                 path = namespace + '/'
 
@@ -202,17 +207,14 @@ class RemoteHandler(tornado.web.RequestHandler):
                 self.write("{success:false}")
 
         elif action == 'login':
-            sess['logged'] = True
-            sess['username'] = self.get_argument('username')
-            sess['password'] = self.get_argument('password')
-            sess.save()
+            self.session['logged'] = True
+            self.session['username'] = self.get_argument('username')
+            self.session['password'] = self.get_argument('password')
+            self.session.save()
             self.write("{success:true}")
 
         elif action == 'logout':
-            sess.invalidate()
-
-        elif action == 'changeinstance':
-            sess['baseurl'] = self.get_argument('baseurl')
+            self.session.invalidate()
 
 
 settings = {
