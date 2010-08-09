@@ -41,6 +41,11 @@ Ext.onReady(function() {
 		mainPanel.addTab(grid);
 	});
 
+	sidePanel.on('permission', function(p, t){
+		var panel = new App.PermissionsPanel({type: t, path: p});
+		mainPanel.addTab(panel);
+	});
+
 	query.on('query', function(q){
 		var grid = new App.ResultsGrid({query: q});
 		mainPanel.addTab(grid);

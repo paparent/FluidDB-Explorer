@@ -11,6 +11,9 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			,'-'
 			,{id: 'ns-create-tag', text: 'Create new tag'}
 			,{id: 'ns-delete-tag', text: 'Delete tag'}
+			,'-'
+			,{id: 'ns-permission', text: 'Permissions'}
+
 		]
 		,listeners: {
 			itemclick: function(i){
@@ -51,6 +54,9 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 						,params: {tag: path}
 						,success: function(){loader.load(parentNode,function(){parentNode.expand();});}
 					});
+					break;
+				case 'ns-permission':
+					node.getOwnerTree().fireEvent('permission', path, node.leaf?'tag':'ns');
 					break;
 				}
 			}
