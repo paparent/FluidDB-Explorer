@@ -219,6 +219,23 @@ class RemoteHandler(BaseHandler):
             except:
                 self.write("")
 
+        elif action == 'setperm':
+            try:
+                type = self.get_argument('type')
+                action = self.get_argument('action')
+                path = self.get_argument('path')
+                policy = self.get_argument('policy')
+                exceptions = json_decode(self.get_argument('exceptions'))
+                if type == 'ns':
+                    response = fluid.permissions.namespaces[path].put(action,
+                            policy, exceptions)
+                else:
+                    response = fluid.permissions.tag_values[path].put(action,
+                            policy, exceptions)
+                self.write(json_encode(response))
+            except:
+                self.write("")
+
         elif action == 'login':
             self.session['logged'] = True
             self.session['username'] = self.get_argument('username')
