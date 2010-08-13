@@ -20,9 +20,13 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		];
 		this.action = new Ext.ux.grid.RowActions({
 			header: 'Actions'
-			,actions:[{iconCls:'icon-refresh',tooltip:'Load tag value'}]
+			,actions: [
+				{iconCls: 'icon-refresh', tooltip: 'Load tag value'}
+				,{iconCls: 'icon-delete', tooltip: 'Remove tag'}
+			]
 			,callbacks:{
 				'icon-refresh': this.onRefresh.createDelegate(this)
+				,'icon-delete': this.onDeleteTag.createDelegate(this)
 			}
 		});
 		this.columns = [
@@ -71,6 +75,16 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	}
 	,onRefresh: function(g, r, action, row, col){
 		this.setTag(r);
+	}
+	,onDeleteTag: function(g, r, action, row, col){
+		r.set('value', '<em>removing tag...</em>');
+		Ext.Ajax.request({
+			url: '/remote/deletetagvalue'
+			,params: {oid: this.oid, tag: r.data.tag}
+			,success: function(a){
+				g.store.remove(r);
+			}
+		});
 	}
 	,setTag: function(r){
 		r.set('value', '<em>loading...</em>');

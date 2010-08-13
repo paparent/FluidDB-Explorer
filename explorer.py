@@ -3,7 +3,7 @@ import tornado.web
 import tornado.wsgi
 import wsgiref.handlers
 
-from tornado.escape import json_encode
+from tornado.escape import json_encode, json_decode
 
 from fom.session import Fluid
 from fom.db import PRIMITIVE_CONTENT_TYPE
@@ -170,6 +170,16 @@ class RemoteHandler(BaseHandler):
                 self.write("{success:true}")
             except:
                 self.write("{success:false}")
+
+        elif action == 'deletetagvalue':
+            try:
+                oid = self.get_argument('oid')
+                tag = self.get_argument('tag')
+                fluid.objects[oid][tag].delete()
+                self.write("{success:true}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'createnamespace':
             try:
