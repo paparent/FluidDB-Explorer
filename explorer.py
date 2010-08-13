@@ -134,11 +134,14 @@ class RemoteHandler(BaseHandler):
                 if k == 200:
                     break
                 if showTagValue:
-                    tagresponse = fluid.objects[oid][tag].get()
-                    if tagresponse.content_type == PRIMITIVE_CONTENT_TYPE:
-                        value = str(tagresponse.value)
-                    else:
-                        value = '<em>(Opaque value)</em>'
+                    try:
+                        tagresponse = fluid.objects[oid][tag].get()
+                        if tagresponse.content_type == PRIMITIVE_CONTENT_TYPE:
+                            value = str(tagresponse.value)
+                        else:
+                            value = '<em>(Opaque value)</em>'
+                    except:
+                        value = '...request error...'
                 else:
                     value = "<em>Too many tags to fetch values</em>"
 
@@ -165,11 +168,12 @@ class RemoteHandler(BaseHandler):
             try:
                 oid = self.get_argument('oid')
                 tag = self.get_argument('tag')
-                value = self.get_argument('value')
+                value = self.get_argument('value', default=None)
                 fluid.objects[oid][tag].put(value)
                 self.write("{success:true}")
-            except:
-                self.write("{success:false}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'deletetagvalue':
             try:
@@ -188,16 +192,18 @@ class RemoteHandler(BaseHandler):
                 description = self.get_argument('description')
                 fluid.namespaces[path].post(namespace, description)
                 self.write("{success:true}")
-            except:
-                self.write("{success:false}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'deletenamespace':
             try:
                 namespace = self.get_argument('namespace')
                 fluid.namespaces[namespace].delete()
                 self.write("{success:true}")
-            except:
-                self.write("{success:false}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'createtag':
             try:
@@ -206,16 +212,18 @@ class RemoteHandler(BaseHandler):
                 description = self.get_argument('description')
                 fluid.tags[path].post(tag, description, False)
                 self.write("{success:true}")
-            except:
-                self.write("{success:false}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'deletetag':
             try:
                 tag = self.get_argument('tag')
                 fluid.tags[tag].delete()
                 self.write("{success:true}")
-            except:
-                self.write("{success:false}")
+            except fom.errors.FluidError, e:
+                self.set_status(e.status)
+                self.write("{success:false,msg:'%s'}" % (e.http_error,))
 
         elif action == 'getperm':
             try:

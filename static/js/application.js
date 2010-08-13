@@ -64,6 +64,11 @@ Ext.onReady(function() {
 		openResultsGrid(q);
 	});
 
+	Ext.Msg.minWidth = 300;
+	Ext.Ajax.on('requestexception', function(conn, response, options){
+		json = Ext.util.JSON.decode(response.responseText);
+		Ext.Msg.alert('Error from FluidDB', json.msg);
+	});
 });
 
 Ext.util.base64 = {
