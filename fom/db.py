@@ -29,9 +29,9 @@
         Content types which can be deserialized
 """
 
-import urllib
+import types, urllib
+
 import httplib2
-import types
 
 try:
     import json
@@ -43,8 +43,10 @@ except ImportError:
         from django.utils import simplejson as json
 
 from errors import raise_error
+from utils import fom_request_sent, fom_response_received
 
-BASE_URL = 'http://fluiddb.fluidinfo.com'
+
+BASE_URL = 'https://fluiddb.fluidinfo.com'
 NO_CONTENT = object()
 PRIMITIVE_CONTENT_TYPE = 'application/vnd.fluiddb.value+json'
 DESERIALIZABLE_CONTENT_TYPES = set((PRIMITIVE_CONTENT_TYPE, 'application/json'))
@@ -52,16 +54,21 @@ ITERABLE_TYPES = set((list, tuple))
 SERIALIZABLE_TYPES = set((types.NoneType, bool, int, float, str, unicode,
                           list, tuple))
 
-
 def _generate_endpoint_url(base, path, urlargs):
-    url = ''.join([base, path])
+    url = ''.join([base, urllib.quote(path.encode('utf-8'))])
     if urlargs:
+        # make sure we handle unicode characters as possible values
+        for key, value in urlargs.iteritems():
+            if isinstance(value, basestring):
+                urlargs[key] = value.encode('utf-8')
         url = '?'.join([url, urllib.urlencode(urlargs)])
     return url
 
 
 def _get_body_and_type(payload, content_type):
     if content_type:
+        if content_type == 'application/json':
+            return json.dumps(payload), content_type
         return payload, content_type
     if payload is NO_CONTENT:
         return None, None
@@ -155,6 +162,10 @@ class FluidDB(object):
     """
 
     def __init__(self, base_url=BASE_URL):
+        if base_url.endswith('/'):
+            raise ValueError('The domain for FluidDB must *not* end with'\
+                             ' "/". Correct example:'\
+                             ' https://fluiddb.fluidinfo.com')
         self.base_url = base_url
         self.headers = {
             'User-agent': 'fom',
@@ -184,7 +195,10 @@ class FluidDB(object):
         """
         req, params = self._build_request(method, path, payload, urlargs,
                                           content_type)
+        fom_request_sent.send(self, request=params)
         response, content = req(*params)
+        fom_response_received.send(self, response=(response.status,
+                                   content, response.copy()))
         return FluidResponse(response, content, is_value)
 
     def _build_request(self, method, path, payload, urlargs, content_type):
@@ -203,7 +217,6 @@ class FluidDB(object):
 
     def _get_url(self, path, urlargs=None):
         return _generate_endpoint_url(self.base_url, path, urlargs)
-
 
     def login(self, username, password):
         """Log in to this instance of FluidDB

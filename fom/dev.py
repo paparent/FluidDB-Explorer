@@ -11,7 +11,7 @@
 
 from fom.session import Fluid
 
-SANDBOX_URL = 'http://sandbox.fluidinfo.com'
+SANDBOX_URL = 'https://sandbox.fluidinfo.com'
 
 class SandboxFluid(Fluid):
 
