@@ -42,14 +42,15 @@ class BaseHandler(tornado.web.RequestHandler):
     def render_main(self, rootns):
         rootlabel = rootns or 'FluidDB'
         html = self.render_string("index.html", username=self.username,
-            rootlabel=rootlabel, rootid=(rootns or 'fdbexplorer-id-root'))
+            rootlabel=rootlabel, instance=self.session['instance'],
+            rootid=(rootns or 'fdbexplorer-id-root'))
         self.write(html)
 
 
 class MainHandler(BaseHandler):
     def get(self, rootns):
         self.session['instance'] = 'main'
-        self.session['base_url'] = 'https://fluiddb.fluidinfo.com'
+        self.session['base_url'] = 'http://fluiddb.fluidinfo.com'
         self.session['rootns'] = rootns or ''
         self.session.save()
 
@@ -59,7 +60,7 @@ class MainHandler(BaseHandler):
 class SandboxHandler(BaseHandler):
     def get(self, rootns):
         self.session['instance'] = 'sandbox'
-        self.session['base_url'] = 'https://sandbox.fluidinfo.com'
+        self.session['base_url'] = 'http://sandbox.fluidinfo.com'
         self.session['rootns'] = rootns or ''
         self.session.save()
 

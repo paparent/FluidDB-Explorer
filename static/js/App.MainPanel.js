@@ -11,7 +11,13 @@ App.MainPanel = Ext.extend(Ext.TabPanel, {
 		this.setActiveTab(b);
 	}
 	,openObject: function(oid){
-		this.addTab(new App.ObjectPanel({oid:oid}));
+		var id = Ext.util.base64.encode('objectpanel-'+oid);
+		var t = Ext.getCmp(id);
+		if (!t) {
+			t = new App.ObjectPanel({id: id, oid:oid});
+			this.add(t);
+		}
+		this.setActiveTab(t);
 	}
 });
 

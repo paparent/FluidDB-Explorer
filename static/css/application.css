@@ -1,5 +1,6 @@
 html,body{font:normal 12px verdana;margin:0;padding:0;border:0;overflow:hidden;height:100%;}
 .header .x-panel-body{background-color:#1E4176;}
+.instance-sandbox .header .x-panel-body{background-color:#e5c015;}
 h1{font:bold 16px tahoma,arial,sans-serif;color:white;margin:0;padding:5px;}
 
 #welcome h2{font-size:1.4em;margin-bottom:1em;}

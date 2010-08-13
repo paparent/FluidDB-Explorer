@@ -9,9 +9,9 @@
 	<link rel="stylesheet" type="text/css" href="{{ static_url("css/Ext.ux.grid.RowActions.css") }}">
 
 </head>
-<body>
+<body class="instance-{{ instance }}">
 
-<div id="logo"><h1>FluidDB Explorer</h1></div>
+	<div id="logo"><h1>FluidDB Explorer{% if instance == 'sandbox' %} (sandbox){% end %}</h1></div>
 
 <div id="welcome" class="x-hidden">
 	<h2>Welcome to FluidDB Explorer</h2>

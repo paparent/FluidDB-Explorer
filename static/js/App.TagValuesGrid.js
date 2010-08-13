@@ -4,15 +4,18 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,title: 'Tag values'
 	,loadMask: true
 	,oid: null
+	,viewConfig: {emptyText: 'Nothing to display'}
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
 		this.store = new Ext.data.JsonStore({
 			url: '/remote/tagvaluesfetch'
+			,autoDestroy: true
 			,root: 'tags'
 			,fields: ['tag', 'value']
 		});
 		this.tbar = [
-			{text: 'Load all tag values', handler: this.onLoadAllTags, scope: this}
+			{text: 'Reload', handler: this.onReload, scope: this}
+			,{text: 'Load all tag values', handler: this.onLoadAllTags, scope: this}
 			,{text: 'Add a tag', handler: this.onAddTag, scope: this}
 		];
 		this.action = new Ext.ux.grid.RowActions({
@@ -24,8 +27,8 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		});
 		this.columns = [
 			this.action
-			,{id:'tag', header:'Tag', width: 230, dataIndex: 'tag'}
-			,{header: 'Value', width: 600, dataIndex: 'value', editor: {xtype: 'textfield'}}
+			,{id:'tag', header:'Tag', width: 230, dataIndex: 'tag', sortable: true}
+			,{header: 'Value', width: 600, dataIndex: 'value', sortable: true, editor: {xtype: 'textfield'}}
 		];
 		this.plugins = [this.action];
 		App.TagValuesGrid.superclass.initComponent.call(this);
@@ -62,6 +65,9 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	}
 	,onLoadAllTags: function(a){
 		this.store.each(this.setTag.createDelegate(this));
+	}
+	,onReload: function(){
+		this.store.reload();
 	}
 	,onRefresh: function(g, r, action, row, col){
 		this.setTag(r);
