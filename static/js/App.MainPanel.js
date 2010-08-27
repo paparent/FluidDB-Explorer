@@ -3,7 +3,7 @@ App.MainPanel = Ext.extend(Ext.TabPanel, {
 	,enableTabScroll: true
 	,activeTab: 0
 	,initComponent: function(){
-		this.items = [{bodyStyle: 'padding:10px', contentEl: 'welcome', title: 'Welcome', iconCls: 'icon-welcome'}];
+		this.items = [{bodyStyle: 'padding:10px', autoScroll: true, contentEl: 'welcome', title: 'Welcome', iconCls: 'icon-welcome'}];
 		App.MainPanel.superclass.initComponent.call(this);
 	}
 	,addTab: function(a){

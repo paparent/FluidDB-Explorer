@@ -15,13 +15,24 @@
 
 <div id="welcome" class="x-hidden">
 	<h2>Welcome to FluidDB Explorer</h2>
+	{% if rootid == 'nstree-disabled' %}
+	<div class="warning">
+		<strong>Important:</strong> The namespace tree that usually appears on the left has been disabled because you didn't put a starting namespace in the url. Read on to learn more.
+	</div>
+	{% end %}
+	<h3>What is FluidDB Explorer ?</h3>
+	<p>With this tool you can quickly navigate in <a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a>, using either the namespace tree or via <a href="http://doc.fluidinfo.com/fluidDB/queries.html" target="_blank">FluidDB queries</a>.</p>
+	<p>You can explore either the main FluidDB instance (the default), or the sandbox, at: <a href="http://fluiddbexplorer.appspot.com/sandbox/">http://fluiddbexplorer.appspot.com/sandbox/</a></p>
+	<p>To start exploring from a top-level namespace, add it to the URL. Here are some examples:</p>
+	<ul>
+		<li><a href="http://fluiddbexplorer.appspot.com/fluiddb/twitter.com">http://fluiddbexplorer.appspot.com/fluiddb/twitter.com</a></li>
+		<li><a href="http://fluiddbexplorer.appspot.com/fluiddb/epointsystem/scada">http://fluiddbexplorer.appspot.com/fluiddb/epointsystem/scada</a></li>
+	</ul>
+	<p>If you don't have a FluidDB account, feel free to <a href="http://fluidinfo.com/accounts/new/" target="_blank">create one</a>!</p>
+
 	<h3>What is FluidDB ?</h3>
 	<p><a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a> is an online "cloud" database. Using a flexible underlying representation of information and a new model of control, it allows users and applications to work with information more naturally. That includes dynamically organizing, sharing, combining and augmenting information, and searching in ways that have previously not been possible. It also allows users to choose exactly which information to share with whom, with separate controls for reading and writing.</p>
 	<p>FluidDB lets data be social. It allows almost unlimited information personalization by individual users and applications, and also <em>between</em> them. This makes it simple to build a wide variety of applications that benefit from cooperation, and which are open to unanticipated future enhancements. Even more importantly, FluidDB facilitates and encourages the growth of applications that leave users in control of their own data.</p>
-
-	<h3>What is FluidDB Explorer ?</h3>
-	<p>With this tool you can navigate into <a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a> using either the namespace tree or by doing queries.</p>
-
 
 	<h3>How it's built</h3>
 	<p>FluidDB Explorer uses these:</p>

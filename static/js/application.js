@@ -10,7 +10,7 @@ Ext.onReady(function() {
 	var loginId = Ext.id();
 	mainPanel = new App.MainPanel({id: 'mainpanel'});
 
-	var viewport = new Ext.Viewport({
+	var viewport_config = {
 		layout: 'border'
 		,items: [{
 			border: false
@@ -27,10 +27,19 @@ Ext.onReady(function() {
 				,{xtype: 'app.login', id: loginId}
 			]
 			}
-			,{region: 'west', border: true, margins: '5 0 5 5', collapsible: true, collapseMode: 'mini', hideCollapseTool:true, split: true, minSize: 100, maxSize: 400, width: 240, layout: 'fit', items: sidePanel}
-			,{region: 'center', border: true, margins: '5 5 5 0', layout: 'fit', items: mainPanel}
 		]
-	});
+	};
+
+	if (App.Config.rootid != 'nstree-disabled') {
+		viewport_config.items.push({region: 'center', border: true, margins: '5 5 5 0', layout: 'fit', items: mainPanel});
+		viewport_config.items.push({region: 'west', border: true, margins: '5 0 5 5', collapsible: true, collapseMode: 'mini', hideCollapseTool:true, split: true, minSize: 100, maxSize: 400, width: 240, layout: 'fit', items: sidePanel});
+	}
+	else {
+		viewport_config.items.push({region: 'center', border: true, margins: '5 5 5 5', layout: 'fit', items: mainPanel});
+	}
+
+
+	var viewport = new Ext.Viewport(viewport_config);
 
 	var query = Ext.getCmp(queryId);
 	var login = Ext.getCmp(loginId);

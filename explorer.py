@@ -41,22 +41,28 @@ class BaseHandler(tornado.web.RequestHandler):
             username=self.username,
             rootlabel=rootlabel,
             instance=instance,
-            rootid=(rootns or 'fdbexplorer-id-root')
+            rootid=(rootns or 'nstree-disabled')
         )
 
 
 class MainHandler(BaseHandler):
     def get(self):
-        self.redirect("/fluiddb/")
+        if self.username == 'Anonymous':
+            self.redirect("/fluiddb/")
+        else:
+            self.redirect("/fluiddb/%s/" % self.username)
 
 
 class InstanceHandler(BaseHandler):
+    @tornado.web.addslash
     def get(self, instance, rootns):
         rootns = rootns.rstrip('/')
-        self.session['base_url'] = get_instance_url(instance)
-        self.session.save()
-
-        self.render_main(instance, rootns)
+        if rootns == "" and self.username != 'Anonymous':
+            self.redirect("/%s/%s/" % (instance, self.username))
+        else:
+            self.session['base_url'] = get_instance_url(instance)
+            self.session.save()
+            self.render_main(instance, rootns)
 
 
 class RemoteHandler(BaseHandler):
@@ -72,10 +78,7 @@ class RemoteHandler(BaseHandler):
 
         if action == 'namespacesfetch':
             namespace = self.get_argument('node')
-            if namespace == 'fdbexplorer-id-root':
-                namespace = path = ''
-            else:
-                path = namespace + '/'
+            path = namespace + '/'
 
             response = fluid.namespaces[namespace].get(returnNamespaces=True,
                 returnTags=True)
@@ -262,7 +265,7 @@ settings = {
 
 application = tornado.wsgi.WSGIApplication([
     (r"/remote/([a-z0-9\.]+)/(.+)", RemoteHandler),
-    (r"/([a-z0-9\.]+)/(.*)", InstanceHandler),
+    (r"/([a-z0-9\.]+)/?(.*)", InstanceHandler),
     (r"/", MainHandler),
     ], **settings)
 
