@@ -17,9 +17,15 @@
 """A utility class to write to and read from a non-blocking socket."""
 
 import errno
-import ioloop
 import logging
 import socket
+
+from tornado import ioloop
+
+try:
+    import ssl # Python 2.6+
+except ImportError:
+    ssl = None
 
 class IOStream(object):
     """A utility class to write to and read from a non-blocking socket.
@@ -81,7 +87,7 @@ class IOStream(object):
         assert not self._read_callback, "Already reading"
         loc = self._read_buffer.find(delimiter)
         if loc != -1:
-            callback(self._consume(loc + len(delimiter)))
+            self._run_callback(callback, self._consume(loc + len(delimiter)))
             return
         self._check_closed()
         self._read_delimiter = delimiter
@@ -122,7 +128,8 @@ class IOStream(object):
             self.io_loop.remove_handler(self.socket.fileno())
             self.socket.close()
             self.socket = None
-            if self._close_callback: self._close_callback()
+            if self._close_callback:
+                self._run_callback(self._close_callback)
 
     def reading(self):
         """Returns true if we are currently reading from the stream."""
@@ -159,6 +166,19 @@ class IOStream(object):
             self._state = state
             self.io_loop.update_handler(self.socket.fileno(), self._state)
 
+    def _run_callback(self, callback, *args, **kwargs):
+        try:
+            callback(*args, **kwargs)
+        except:
+            # Close the socket on an uncaught exception from a user callback
+            # (It would eventually get closed when the socket object is
+            # gc'd, but we don't want to rely on gc happening before we
+            # run out of file descriptors)
+            self.close()
+            # Re-raise the exception so that IOLoop.handle_callback_exception
+            # can see it and log the error
+            raise
+
     def _handle_read(self):
         try:
             chunk = self.socket.recv(self.read_chunk_size)
@@ -184,7 +204,7 @@ class IOStream(object):
                 callback = self._read_callback
                 self._read_callback = None
                 self._read_bytes = None
-                callback(self._consume(num_bytes))
+                self._run_callback(callback, self._consume(num_bytes))
         elif self._read_delimiter:
             loc = self._read_buffer.find(self._read_delimiter)
             if loc != -1:
@@ -192,7 +212,8 @@ class IOStream(object):
                 delimiter_len = len(self._read_delimiter)
                 self._read_callback = None
                 self._read_delimiter = None
-                callback(self._consume(loc + delimiter_len))
+                self._run_callback(callback,
+                                   self._consume(loc + delimiter_len))
 
     def _handle_write(self):
         while self._write_buffer:
@@ -210,7 +231,7 @@ class IOStream(object):
         if not self._write_buffer and self._write_callback:
             callback = self._write_callback
             self._write_callback = None
-            callback()
+            self._run_callback(callback)
 
     def _consume(self, loc):
         result = self._read_buffer[:loc]
@@ -225,3 +246,44 @@ class IOStream(object):
         if not self._state & state:
             self._state = self._state | state
             self.io_loop.update_handler(self.socket.fileno(), self._state)
+
+
+class SSLIOStream(IOStream):
+    """Sets up an SSL connection in a non-blocking manner"""
+    def __init__(self, *args, **kwargs):
+        super(SSLIOStream, self).__init__(*args, **kwargs)
+        self._ssl_accepting = True
+        self._do_ssl_handshake()
+
+    def _do_ssl_handshake(self):
+        # Based on code from test_ssl.py in the python stdlib
+        try:
+            self.socket.do_handshake()
+        except ssl.SSLError, err:
+            if err.args[0] == ssl.SSL_ERROR_WANT_READ:
+                self._add_io_state(self.io_loop.READ)
+                return
+            elif err.args[0] == ssl.SSL_ERROR_WANT_WRITE:
+                self._add_io_state(self.io_loop.WRITE)
+                return
+            elif err.args[0] in (ssl.SSL_ERROR_EOF,
+                                 ssl.SSL_ERROR_ZERO_RETURN):
+                return self.close()
+            raise
+        except socket.error, err:
+            if err.args[0] == errno.ECONNABORTED:
+                return self.close()
+        else:
+            self._ssl_accepting = False
+
+    def _handle_read(self):
+        if self._ssl_accepting:
+            self._do_ssl_handshake()
+            return
+        super(SSLIOStream, self)._handle_read()
+
+    def _handle_write(self):
+        if self._ssl_accepting:
+            self._do_ssl_handshake()
+            return
+        super(SSLIOStream, self)._handle_write()
