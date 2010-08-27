@@ -43,7 +43,7 @@ class _DummyNamespace(object):
 
 
 if Namespace is None:
-    Namespace = DummyNamespace
+    Namespace = _DummyNamespace
 
 
 # Fom's signals

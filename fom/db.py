@@ -1,7 +1,7 @@
 
 """
-    fluiddb.db
-    ~~~~~~~~~~
+    fom.db
+    ~~~~~~
 
     Raw connection and querying.
 
@@ -44,6 +44,7 @@ except ImportError:
 
 from errors import raise_error
 from utils import fom_request_sent, fom_response_received
+from version import version
 
 
 BASE_URL = 'https://fluiddb.fluidinfo.com'
@@ -55,11 +56,15 @@ SERIALIZABLE_TYPES = set((types.NoneType, bool, int, float, str, unicode,
                           list, tuple))
 
 def _generate_endpoint_url(base, path, urlargs):
-    url = ''.join([base, urllib.quote(path.encode('utf-8'))])
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
+    url = ''.join([base, urllib.quote(path)])
     if urlargs:
         # make sure we handle unicode characters as possible values
+        # NOTE: only use UTF-8 unicode for urlargs values. Anything else will
+        # break.
         for key, value in urlargs.iteritems():
-            if isinstance(value, basestring):
+            if isinstance(value, unicode):
                 urlargs[key] = value.encode('utf-8')
         url = '?'.join([url, urllib.urlencode(urlargs)])
     return url
@@ -168,7 +173,7 @@ class FluidDB(object):
                              ' https://fluiddb.fluidinfo.com')
         self.base_url = base_url
         self.headers = {
-            'User-agent': 'fom',
+            'User-agent': 'fom/%s' % version,
         }
         # XXX Backwards compat
         self.client = self

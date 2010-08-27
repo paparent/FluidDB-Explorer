@@ -34,6 +34,10 @@ class SessionBound(object):
             fluid = Fluid.bound
         self.fluid = fluid
 
+    def __repr__(self):
+        return '<%s path=%r>' % (self.__class__.__name__, self.path)
+
+
 class Policy(object):
     """
     Represents a policy specification for permissions on an action
@@ -46,6 +50,7 @@ class Policy(object):
         return '<Policy: %s except for %s>' % (self.policy, self.exceptions)
 
     __str__ = __repr__
+
 
 class Permissions(object):
     """
@@ -71,8 +76,10 @@ class Permissions(object):
         else:
             raise TypeError('Use an instance of Policy to set the policy')
 
+
 class Namespace(SessionBound):
-    """A FluidDB Namespace"""
+    """A FluidDB Namespace
+    """
 
     def __init__(self, path, fluid=None):
         super(Namespace, self).__init__(path, fluid)
@@ -80,10 +87,6 @@ class Namespace(SessionBound):
 
     def create(self, description):
         """Create this namespace.
-
-        >>> ns = Namespace(u'test/reviews')
-        >>> ns.create(u'A place for all my reviews')
-        <FluidResponse (201, 'application/json' ...>
 
         :param description: The description of the Namespace
         """
@@ -94,11 +97,6 @@ class Namespace(SessionBound):
     def create_namespace(self, name, description):
         """Create a child namespace, and return it.
 
-        >>> ns = Namespace(u'test')
-        >>> reviews_ns = ns.create_namespace(
-        ...     u'reviews', u'A place for all my reviews')
-
-
         :param name: The name of the Namespace to be created
         :param description: The description of the Namespace to be created
         """
@@ -106,10 +104,7 @@ class Namespace(SessionBound):
         return Namespace(path_child(self.path, name))
 
     def create_tag(self, name, description, indexed):
-        """Create a tag in this namespace.
-
-        >>> ns = Namespace(u'test')
-        >>> tag = ns.create_tag(u'review', u'A review I write', False)
+        """Create a tag in this namespace, and return it.
 
         :param name: The name of the Tag to be created
         :param description: The description of the Tag to be created
@@ -119,33 +114,21 @@ class Namespace(SessionBound):
         return Tag(path_child(self.path, name))
 
     def delete(self):
-        """Delete this namespace
-
-        >>> ns = Namespace(u'test/reviews')
-        >>> ns.create(u'A place for my reviews')
-        >>> ns.delete()
+        """Delete this namespace.
         """
         return self.api.delete()
 
     def tag(self, name):
-        """Get a child Tag
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.tag(u'about')
-        <fom.mapping.Tag object at 0x87c708c>
+        """Get a child tag of this namespace.
 
         :param name: The name of the child Tag to get.
         """
         return Tag(path_child(self.path, name))
 
     def namespace(self, name):
-        """Get a child Namespace
+        """Get a child namespace of this namespace
 
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.namespace(u'default')
-        <fom.mapping.Namespace object at 0x87c71ac>
-
-        :param name: The name of the child Namespace to get.
+        :param name: The name of the child namespace to get.
         """
         return Namespace(path_child(self.path, name))
 
@@ -165,11 +148,7 @@ class Namespace(SessionBound):
     def _get_description(self):
         """The description of this Namespace.
 
-        Setting the value attempts to set the description in the FluidDB.
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.description
-        u"FluidDB admin user's top-level namespace."
+        Setting and getting the value attempts to set/get the description in the FluidDB.
         """
         r = self.api.get(returnDescription=True)
         return r.value[u'description']
@@ -179,15 +158,13 @@ class Namespace(SessionBound):
         """
         return self.api.put(description)
 
-    description = property(_get_description, _set_description)
+    # python2.5
+    description = property(_get_description, _set_description,
+                           doc=_get_description.__doc__)
 
     @property
     def tag_names(self):
         """The names of the Tags in this Namespace.
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.tag_names
-        [u'about']
         """
         r = self.api.get(returnTags=True)
         return r.value[u'tagNames']
@@ -195,10 +172,6 @@ class Namespace(SessionBound):
     @property
     def tag_paths(self):
         """The full paths of the Tags in this Namespace
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.tag_paths
-        [u'fluiddb/about']
         """
         return [
             path_child(self.path, child) for child in self.tag_names
@@ -207,9 +180,6 @@ class Namespace(SessionBound):
     @property
     def tags(self):
         """The Tags in this Namespace
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.tags
         """
         return [
             Tag(path) for path in self.tag_paths
@@ -218,10 +188,6 @@ class Namespace(SessionBound):
     @property
     def namespace_names(self):
         """The names of the child Namespaces in this Namespace
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.namespace_names
-        [u'default', u'tags', u'tag-values', u'namespaces', u'users']
         """
         r = self.api.get(returnNamespaces=True)
         return r.value[u'namespaceNames']
@@ -229,10 +195,6 @@ class Namespace(SessionBound):
     @property
     def namespace_paths(self):
         """The full paths of the child Namespaces in this Namespace
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.namespace_paths
-        [u'fluiddb/default', u'fluiddb/tags', u'fluiddb/tag-values' ...]
         """
         return [
             path_child(self.path, child) for child in self.namespace_names
@@ -241,14 +203,11 @@ class Namespace(SessionBound):
     @property
     def namespaces(self):
         """The child Namespaces in this Namespace
-
-        >>> ns = Namespace(u'fluiddb')
-        >>> ns.namespaces
-        [<fom.mapping.Namespace object at 0x877ea4c>, ...]
         """
         return [
             Namespace(path) for path in self.namespace_paths
         ]
+
 
 class Tag(SessionBound):
     """A FluidDB Tag"""
@@ -296,33 +255,46 @@ class Tag(SessionBound):
         """
         self.api.delete()
 
+
 class readonly_tag_value(object):
     """Descriptor to provide a tag value lookup on an object to simulate a
     simple attribute.
-    """
 
-    def __init__(self, tagpath):
+    :param tagpath: The path of the tag to store this value in and read it
+                    from
+    """
+    def __init__(self, tagpath, cached=True):
         self.tagpath = tagpath
+        self.cached = cached
 
     def __get__(self, instance, owner):
-        return instance.get(self.tagpath)[0]
+        if self.cached:
+            value = instance.get_cached(self.tagpath)
+        else:
+            value = None
+        if value is None:
+            value = instance.get(self.tagpath)[0]
+        return value
+
 
 
 class tag_value(readonly_tag_value):
     """Descriptor to provide a tag value lookup on an object to simulate a
     simple attribute. With write support.
-    """
 
-    def __init__(self, tagpath, defaultType=None):
+    :param tagpath: The path of the tag to store this value in and read it
+                    from
+    """
+    def __init__(self, tagpath, content_type=None, cached=True):
         """
-        defaultType argument sets the default mime-type to be used when
+        content_type argument sets the default mime-type to be used when
         PUTting the value
         """
-        super(tag_value, self).__init__(tagpath)
-        self.defaultType = defaultType
+        super(tag_value, self).__init__(tagpath, cached)
+        self.content_type = content_type
 
     def __set__(self, instance, value):
-        return instance.set(self.tagpath, value, self.defaultType)
+        return instance.set(self.tagpath, value, self.content_type)
 
 
 
@@ -336,6 +308,7 @@ class Object(SessionBound):
         self.fluid = fluid or Fluid.bound
         if about is not None:
             self.create(about)
+        self._cache = {}
 
     def create(self, about=None):
         """Create a new object.
@@ -343,16 +316,29 @@ class Object(SessionBound):
         r = self.fluid.objects.post(about)
         self.uid = r.value[u'id']
 
-    def get(self, tag):
+    def get(self, tagpath):
         """Get the value of a tag.
         """
-        tagpath = tag
         r = self.api[tagpath].get()
+        self._cache[tagpath] = r.value
         return r.value, r.content_type
+
+    def get_cached(self, tagpath):
+        """Get the cached value of a tag.
+        """
+        return self._cache.get(tagpath)
+
+    def refresh(self, *tagpaths):
+        if tagpaths:
+            for tagpath in tagpaths:
+                del self._cache[tagpath]
+        else:
+            self._cache.clear()
 
     def set(self, tagpath, value, valueType=None):
         """Set the value of a tag.
         """
+        self._cache[tagpath] = value
         self.api[tagpath].put(value, valueType)
 
     def delete(self, tagpath):
@@ -400,7 +386,11 @@ class Object(SessionBound):
         return [class_type(uid) for uid in objects.value['ids']]
 
     def __repr__(self):
-        return '<%s %s>' % (self.__class__.__name__, self.about)
+        return '<%s %s>' % (self.__class__.__name__, self.uid)
+
+    def __eq__(self, other):
+        return self.uid and (other.uid == self.uid)
+
 
 class tag_relation(tag_value):
     """Descriptor to provide a relation lookup.
@@ -408,8 +398,8 @@ class tag_relation(tag_value):
     An id is actually stored in the database.
     """
 
-    def __init__(self, tag, object_type=Object):
-        tag_value.__init__(self, tag)
+    def __init__(self, tag, object_type=Object, cached=True):
+        tag_value.__init__(self, tag, cached=cached)
         self.object_type = object_type
 
     def __get__(self, instance, owner):
@@ -420,19 +410,50 @@ class tag_relation(tag_value):
         return tag_value.__set__(self, instance, value.uid)
 
 
+class tag_relations(tag_value):
+    """Descriptor to provide a list of relations.
+
+    A list of ids are stored in the database
+    """
+    def __init__(self, tagpath, object_type=Object, cached=True):
+        tag_value.__init__(self, tagpath, cached=cached)
+        self.object_type = object_type
+
+    def __get__(self, instance, owner):
+        uids = tag_value.__get__(self, instance, owner)
+        return [self.object_type(uid) for uid in uids]
+
+    def __set__(self, instance, value):
+        uids = [obj.uid for obj in value]
+        return tag_value.__set__(self, instance, uids)
+
+
 class CollectionManager(object):
 
-    def __init__(self, instance, base_tagpath, object_type=Object):
+    base_nspath = 'test/fom/Collections'
+
+    def __init__(self, instance, tagpath, object_type, foreign_tagpath):
         self.instance = instance
-        self.base_tagpath = base_tagpath
+        self.tagpath = tagpath
         self.object_type = object_type
+        self.foreign_tagpath = foreign_tagpath
         self.target_tagpath = self._get_tagpath()
 
     def add(self, other):
         other.set(self.target_tagpath, self.instance.uid)
+        if self.foreign_tagpath is not None:
+            # don't set foreign on the reverse side
+            manager = CollectionManager(other, self.foreign_tagpath,
+                                        self.object_type, None)
+            manager.add(self.instance)
 
     def remove(self, other):
         other.delete(self.target_tagpath)
+        if self.foreign_tagpath is not None:
+            # don't set foreign on the reverse side
+            manager = CollectionManager(other, self.foreign_tagpath,
+                                        self.object_type, None)
+            manager.remove(self.instance)
 
     def __iter__(self):
         for item_id in self._fetch():
@@ -449,21 +470,21 @@ class CollectionManager(object):
 
     def _get_tagpath(self):
         try:
-            return self.instance.get(self.base_tagpath)[0]
+            return self.instance.get(self.tagpath)[0]
         except Fluid404Error:
             # manager is not yet created
             return self._create_manager()
 
     def _create_manager(self):
         uid = self._generate_uid()
-        tag_path = '/'.join([self.base_tagpath, uid])
-        self.instance.set(self.base_tagpath, tag_path)
-        Namespace(self.base_tagpath).create_tag(uid, u'Manager tag', True)
-        return tag_path
+        tagpath = '/'.join([self.base_nspath, uid])
+        self.instance.set(self.tagpath, tagpath)
+        Namespace(self.base_nspath).create_tag(uid, u'Manager tag', True)
+        return tagpath
 
     def _generate_uid(self):
         url = '%s/%s' % (self.instance.fluid.db._get_url(self.instance.api.url),
-                         self.base_tagpath)
+                         self.tagpath)
         uid = unicode(uuid.uuid5(uuid.NAMESPACE_URL, str(url))).replace('-', '')
         return uid
 
@@ -472,17 +493,24 @@ class CollectionManager(object):
         for obj in resp.value[u'ids']:
             yield obj
 
-class tag_manager(tag_value):
+    def __str__(self):
+        return str(list(self))
 
-    def __init__(self, tagpath, map_type=Object, manager_type=CollectionManager):
+
+class tag_collection(tag_value):
+
+    def __init__(self, tagpath, map_type=Object,
+                 manager_type=CollectionManager, foreign_tagpath=None):
         tag_value.__init__(self, tagpath)
         self.map_type = map_type
         self.manager_type = manager_type
+        self.foreign_tagpath = foreign_tagpath
 
     def __get__(self, instance, owner):
         if instance.uid is None:
             raise ValueError(u'This object has not been created.')
-        return self.manager_type(instance, self.tagpath, self.map_type)
+        return self.manager_type(instance, self.tagpath, self.map_type,
+                                 self.foreign_tagpath)
 
 
 
