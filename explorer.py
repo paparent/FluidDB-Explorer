@@ -7,7 +7,7 @@ from tornado.escape import json_encode, json_decode
 
 from fom.session import Fluid
 from fom.db import PRIMITIVE_CONTENT_TYPE
-import fom.errors
+from fom.errors import FluidError, Fluid404Error
 
 import gmemsess
 
@@ -35,21 +35,14 @@ class BaseHandler(tornado.web.RequestHandler):
             self.username = self.session['username'] = 'Anonymous'
             self.session.save()
 
-    @property
-    def fluiddb_rootns(self):
-        try:
-            rootns = self.session['rootns']
-        except KeyError:
-            rootns = self.session['rootns'] = ''
-            self.session.save()
-        return rootns
-
-    def render_main(self, rootns):
+    def render_main(self, instance, rootns):
         rootlabel = rootns or 'FluidDB'
-        html = self.render_string("index.html", username=self.username,
-            rootlabel=rootlabel, instance=self.session['instance'],
-            rootid=(rootns or 'fdbexplorer-id-root'))
-        self.write(html)
+        self.render("index.html",
+            username=self.username,
+            rootlabel=rootlabel,
+            instance=instance,
+            rootid=(rootns or 'fdbexplorer-id-root')
+        )
 
 
 class MainHandler(BaseHandler):
@@ -60,12 +53,10 @@ class MainHandler(BaseHandler):
 class InstanceHandler(BaseHandler):
     def get(self, instance, rootns):
         rootns = rootns.rstrip('/')
-        self.session['instance'] = instance
         self.session['base_url'] = get_instance_url(instance)
-        self.session['rootns'] = rootns or ''
         self.session.save()
 
-        self.render_main(rootns)
+        self.render_main(instance, rootns)
 
 
 class RemoteHandler(BaseHandler):
@@ -82,8 +73,7 @@ class RemoteHandler(BaseHandler):
         if action == 'namespacesfetch':
             namespace = self.get_argument('node')
             if namespace == 'fdbexplorer-id-root':
-                namespace = self.fluiddb_rootns
-                path = '' if namespace == '' else namespace + '/'
+                namespace = path = ''
             else:
                 path = namespace + '/'
 
@@ -103,22 +93,19 @@ class RemoteHandler(BaseHandler):
             ids = response.value['ids']
 
             out = []
-            if len(ids) > 30:
-                showAbout = False
-            else:
-                showAbout = True
+            showAbout = False if len(ids) > 30 else True
             for objid in ids:
                 if showAbout:
                     try:
                         about = \
                             fluid.objects[objid]['fluiddb/about'].get().value
-                    except fom.errors.Fluid404Error:
+                    except Fluid404Error:
                         about = 'no about tag'
                 else:
                     about = '<em>too many objects (more than 30) to fetch ' \
                             'about tag</em>'
                 out.append({'oid': objid, 'about': about})
-            self.write(json_encode({'ids': out}))
+            self.write({'ids': out})
 
         elif action == 'tagvaluesfetch':
             oid = self.get_argument('oid')
@@ -126,10 +113,7 @@ class RemoteHandler(BaseHandler):
             out = []
             k = 0
             tags = response.value['tagPaths']
-            if len(tags) > 10:
-                showTagValue = False
-            else:
-                showTagValue = True
+            showTagValue = False if len(tags) > 10 else True
             for tag in tags:
                 k = k + 1
                 if k == 200:
@@ -147,7 +131,7 @@ class RemoteHandler(BaseHandler):
                     value = "<em>Too many tags to fetch values</em>"
 
                 out.append({'tag': tag, 'value': value})
-            self.write(json_encode({'tags': out}))
+            self.write({'tags': out})
 
         elif action == 'gettagvalue':
             try:
@@ -171,20 +155,20 @@ class RemoteHandler(BaseHandler):
                 tag = self.get_argument('tag')
                 value = self.get_argument('value', default=None)
                 fluid.objects[oid][tag].put(value)
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'deletetagvalue':
             try:
                 oid = self.get_argument('oid')
                 tag = self.get_argument('tag')
                 fluid.objects[oid][tag].delete()
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'createnamespace':
             try:
@@ -192,19 +176,19 @@ class RemoteHandler(BaseHandler):
                 namespace = self.get_argument('namespace')
                 description = self.get_argument('description')
                 fluid.namespaces[path].post(namespace, description)
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'deletenamespace':
             try:
                 namespace = self.get_argument('namespace')
                 fluid.namespaces[namespace].delete()
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'createtag':
             try:
@@ -212,19 +196,19 @@ class RemoteHandler(BaseHandler):
                 tag = self.get_argument('tag')
                 description = self.get_argument('description')
                 fluid.tags[path].post(tag, description, False)
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'deletetag':
             try:
                 tag = self.get_argument('tag')
                 fluid.tags[tag].delete()
-                self.write("{success:true}")
-            except fom.errors.FluidError, e:
+                self.write({"success": True})
+            except FluidError, e:
                 self.set_status(e.status)
-                self.write("{success:false,msg:'%s'}" % (e.http_error,))
+                self.write({"success": False, "msg": e.http_error})
 
         elif action == 'getperm':
             try:
@@ -261,7 +245,7 @@ class RemoteHandler(BaseHandler):
             self.session['username'] = self.get_argument('username')
             self.session['password'] = self.get_argument('password')
             self.session.save()
-            self.write("{success:true}")
+            self.write({"success": True})
 
         elif action == 'logout':
             self.session.invalidate()
