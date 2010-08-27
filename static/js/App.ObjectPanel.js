@@ -5,7 +5,7 @@ App.ObjectPanel = Ext.extend(Ext.Panel, {
 	,initComponent: function(){
 		this.items = [
 			{border:false,layout:'fit',bodyStyle:'padding:5px;',html:"Object ID: " + this.oid}
-			,new App.TagValuesGrid({oid: this.oid})
+			,new App.TagValuesGrid({oid: this.oid, flex: 1})
 		];
 		this.title = 'Object ' + this.oid;
 		App.ObjectPanel.superclass.initComponent.call(this);
