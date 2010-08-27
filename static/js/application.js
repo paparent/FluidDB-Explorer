@@ -74,10 +74,10 @@ Ext.onReady(function() {
 Ext.util.base64 = {
 
     base64s : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-    
+
     encode: function(decStr){
         if (typeof btoa === 'function') {
-             return btoa(decStr);            
+             return btoa(decStr);
         }
         var base64s = this.base64s;
         var bits;
@@ -95,12 +95,12 @@ Ext.util.base64 = {
         }
         return(encOut);
     },
-    
+
     decode: function(encStr){
         if (typeof atob === 'function') {
-            return atob(encStr); 
+            return atob(encStr);
         }
-        var base64s = this.base64s;        
+        var base64s = this.base64s;
         var bits;
         var decOut = "";
         var i = 0;
