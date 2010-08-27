@@ -8,7 +8,7 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
 		this.store = new Ext.data.JsonStore({
-			url: '/remote/query'
+			url: App.Config.base_remote + 'query'
 			,autoDestroy: true
 			,root: 'ids'
 			,fields: ['oid', 'about']
@@ -58,7 +58,7 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,setAboutTag: function(r){
 		r.set('about', '<em>loading...</em>');
 		Ext.Ajax.request({
-			url: '/remote/gettagvalue'
+			url: App.Config.base_remote + 'gettagvalue'
 			,params: {oid: r.data.oid, tag: "fluiddb/about"}
 			,success: function(a){
 				r.set('about', a.responseText);

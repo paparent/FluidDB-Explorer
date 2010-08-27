@@ -25,7 +25,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 					var namespace = window.prompt('Namespace name');
 					var desc = window.prompt('Description');
 					Ext.Ajax.request({
-						url: '/remote/createnamespace'
+						url: App.Config.base_remote + 'createnamespace'
 						,params: {path: path, namespace: namespace, description: desc}
 						,success: function(){loader.load(node,function(){node.expand();});}
 					});
@@ -33,7 +33,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 				case 'ns-delete-namespace':
 					parentNode = node.parentNode;
 					Ext.Ajax.request({
-						url: '/remote/deletenamespace'
+						url: App.Config.base_remote + 'deletenamespace'
 						,params: {namespace: path}
 						,success: function(){loader.load(parentNode,function(){parentNode.expand();});}
 					});
@@ -42,7 +42,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 					var tag = window.prompt('Tag name');
 					var desc = window.prompt('Description');
 					Ext.Ajax.request({
-						url: '/remote/createtag'
+						url: App.config.base_remote + 'createtag'
 						,params: {path: path, tag: tag, description: desc}
 						,success: function(){loader.load(node,function(){node.expand();});}
 					});
@@ -50,7 +50,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 				case 'ns-delete-tag':
 					parentNode = node.parentNode;
 					Ext.Ajax.request({
-						url: '/remote/deletetag'
+						url: App.Config.base_remote + 'deletetag'
 						,params: {tag: path}
 						,success: function(){loader.load(parentNode,function(){parentNode.expand();});}
 					});
@@ -65,7 +65,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 	,initComponent: function(){
 		this.addEvents('tagclick');
 		this.loader = new Ext.tree.TreeLoader({
-			url: '/remote/namespacesfetch'
+			url: App.Config.base_remote + 'namespacesfetch'
 		});
 
 		this.tbar = [

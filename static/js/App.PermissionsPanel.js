@@ -46,7 +46,7 @@ App.PermPanel = Ext.extend(Ext.Panel, {
 			store: this.storeExceptions
 			,multiSelect: true
 			,emptyText: 'No exceptions'
-			,columns: [{header: 'Exceptions', dataIndex: 'field1'}]		
+			,columns: [{header: 'Exceptions', dataIndex: 'field1'}]
 		});
 
 		this.policyEl = Ext.id();
@@ -74,7 +74,7 @@ App.PermPanel = Ext.extend(Ext.Panel, {
 	}
 	,doLoad: function() {
 		Ext.Ajax.request({
-			url: '/remote/getperm'
+			url: App.Config.base_remote + 'getperm'
 			,params: {type: this.infos[0], action: this.infos[1], path: this.path}
 			,success: function(a){
 				var perm = Ext.util.JSON.decode(a.responseText);
@@ -108,7 +108,7 @@ App.PermPanel = Ext.extend(Ext.Panel, {
 		this.exceptions = new Array();
 		this.storeExceptions.each(function(r){this.exceptions.push(r.data.field1);}, this);
 		Ext.Ajax.request({
-			url: '/remote/setperm'
+			url: App.Config.base_remote + 'setperm'
 			,params: {type: this.infos[0], action: this.infos[1], path: this.path, policy: this.policy, exceptions: Ext.util.JSON.encode(this.exceptions)}
 			,success: function(a){
 			}

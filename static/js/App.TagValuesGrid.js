@@ -8,7 +8,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
 		this.store = new Ext.data.JsonStore({
-			url: '/remote/tagvaluesfetch'
+			url: App.Config.base_remote + 'tagvaluesfetch'
 			,autoDestroy: true
 			,root: 'tags'
 			,fields: ['tag', 'value']
@@ -52,7 +52,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		var value = e.value;
 
 		Ext.Ajax.request({
-			url: '/remote/tagobject'
+			url: App.Config.base_remote + 'tagobject'
 			,params: {oid: this.oid, tag: tag, value: value}
 			,success: function(a){/*TODO:...*/}
 		});
@@ -61,7 +61,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		var tag = window.prompt('Please enter full tag path');
 		var value = window.prompt('Value');
 		Ext.Ajax.request({
-			url: '/remote/tagobject'
+			url: App.Config.base_remote + 'tagobject'
 			,params: {oid: this.oid, tag: tag, value: value}
 			,success: function(a){this.store.reload();}
 			,scope: this
@@ -79,7 +79,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,onDeleteTag: function(g, r, action, row, col){
 		r.set('value', '<em>removing tag...</em>');
 		Ext.Ajax.request({
-			url: '/remote/deletetagvalue'
+			url: App.Config.base_remote + 'deletetagvalue'
 			,params: {oid: this.oid, tag: r.data.tag}
 			,success: function(a){
 				g.store.remove(r);
@@ -89,7 +89,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,setTag: function(r){
 		r.set('value', '<em>loading...</em>');
 		Ext.Ajax.request({
-			url: '/remote/gettagvalue'
+			url: App.Config.base_remote + 'gettagvalue'
 			,params: {oid: this.oid, tag: r.data.tag}
 			,success: function(a){
 				r.set('value', a.responseText);

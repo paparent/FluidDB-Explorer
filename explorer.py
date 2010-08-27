@@ -12,6 +12,20 @@ import fom.errors
 import gmemsess
 
 
+INSTANCE_URL = {
+    'fluiddb': 'http://fluiddb.fluidinfo.com',
+    'sandbox': 'http://sandbox.fluidinfo.com',
+}
+
+
+def get_instance_url(instance):
+    try:
+        url = INSTANCE_URL[instance]
+    except KeyError:
+        url = 'http://' + instance
+    return url
+
+
 class BaseHandler(tornado.web.RequestHandler):
     def prepare(self):
         self.session = gmemsess.Session(self)
@@ -20,15 +34,6 @@ class BaseHandler(tornado.web.RequestHandler):
         except KeyError:
             self.username = self.session['username'] = 'Anonymous'
             self.session.save()
-
-    @property
-    def fluiddb_base_url(self):
-        try:
-            base_url = self.session['base_url']
-        except KeyError:
-            base_url = self.session['base_url'] = 'http://fluiddb.fluidinfo.com'
-            self.session.save()
-        return base_url
 
     @property
     def fluiddb_rootns(self):
@@ -48,19 +53,15 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
 class MainHandler(BaseHandler):
-    def get(self, rootns):
-        self.session['instance'] = 'main'
-        self.session['base_url'] = 'http://fluiddb.fluidinfo.com'
-        self.session['rootns'] = rootns or ''
-        self.session.save()
-
-        self.render_main(rootns)
+    def get(self):
+        self.redirect("/fluiddb/")
 
 
-class SandboxHandler(BaseHandler):
-    def get(self, rootns):
-        self.session['instance'] = 'sandbox'
-        self.session['base_url'] = 'http://sandbox.fluidinfo.com'
+class InstanceHandler(BaseHandler):
+    def get(self, instance, rootns):
+        rootns = rootns.rstrip('/')
+        self.session['instance'] = instance
+        self.session['base_url'] = get_instance_url(instance)
         self.session['rootns'] = rootns or ''
         self.session.save()
 
@@ -68,8 +69,8 @@ class SandboxHandler(BaseHandler):
 
 
 class RemoteHandler(BaseHandler):
-    def post(self, action):
-        fluid = Fluid(self.fluiddb_base_url)
+    def post(self, instance, action):
+        fluid = Fluid(get_instance_url(instance))
 
         try:
             sess_username = self.session['username']
@@ -276,10 +277,9 @@ settings = {
         }
 
 application = tornado.wsgi.WSGIApplication([
-    (r"/remote/(.+)", RemoteHandler),
-    (r"/sandbox/remote/(.+)", RemoteHandler),
-    (r"/sandbox/(.*)", SandboxHandler),
-    (r"/(.*)", MainHandler),
+    (r"/remote/([a-z0-9\.]+)/(.+)", RemoteHandler),
+    (r"/([a-z0-9\.]+)/(.*)", InstanceHandler),
+    (r"/", MainHandler),
     ], **settings)
 
 

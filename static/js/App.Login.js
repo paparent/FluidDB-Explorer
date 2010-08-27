@@ -8,7 +8,7 @@ App.Login = Ext.extend(Ext.Button, {
 		var username = window.prompt("Username");
 		var password = window.prompt("Password");
 		Ext.Ajax.request({
-			url: '/remote/login'
+			url: App.Config.base_remote + 'login'
 			,params: {username: username, password: password}
 			,success: function(r, o){Ext.Msg.alert('Login', 'You are now logged');}
 			,failure: function(r, o){Ext.Msg.alert('Failed', 'Something wrong happend');}
