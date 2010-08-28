@@ -4,6 +4,7 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,title: 'Query results'
 	,loadMask: true
 	,query: null
+	,iconCls: 'icon-tab-results'
 	,viewConfig: {emptyText: 'Nothing to display'}
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
@@ -14,12 +15,11 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 			,fields: ['oid', 'about']
 		});
 		this.tbar = [
-			{text:'Reload',scope:this,handler:this.doRefresh}
-			,{text:'Load all about tags',scope:this,handler:this.onLoadAll}
+			{text:'Refresh',iconCls:'icon-refresh',scope:this,handler:this.doRefresh}
+			,{text:'Load all about tags',iconCls:'icon-fetch-all',scope:this,handler:this.onLoadAll}
 		];
 		this.action = new Ext.ux.grid.RowActions({
-			header: 'Actions'
-			,actions:[{iconCls:'icon-refresh',tooltip:'Load about tag'}]
+			actions:[{iconCls:'icon-refresh',tooltip:'Refresh about tag'}]
 			,callbacks:{
 				'icon-refresh': this.onRefreshRow.createDelegate(this)
 			}
@@ -27,7 +27,7 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 		this.columns = [
 			this.action
 			,{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid', sortable: true}
-			,{header: 'About', width: 600, dataIndex: 'about', sortable: true}
+			,{header: 'About tag', width: 600, dataIndex: 'about', sortable: true}
 		];
 		this.plugins = [this.action];
 		App.ResultsGrid.superclass.initComponent.call(this);

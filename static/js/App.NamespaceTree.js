@@ -1,5 +1,6 @@
 App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 	autoScroll: true
+	,id: 'namespacestree'
 	,animate: false
 	,border: false
 	,title: 'Namespaces'

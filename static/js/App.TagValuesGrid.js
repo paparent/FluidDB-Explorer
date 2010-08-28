@@ -14,19 +14,18 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,fields: ['tag', 'value']
 		});
 		this.tbar = [
-			{text: 'Reload', handler: this.onReload, scope: this}
-			,{text: 'Load all tag values', handler: this.onLoadAllTags, scope: this}
-			,{text: 'Add a tag', handler: this.onAddTag, scope: this}
+			{text: 'Refresh', iconCls: 'icon-refresh', handler: this.onRefresh, scope: this}
+			,{text: 'Load all tag values', iconCls: 'icon-fetch-all', handler: this.onLoadAllTags, scope: this}
+			,{text: 'Add a tag', iconCls: 'icon-tag-add', handler: this.onAddTag, scope: this}
 		];
 		this.action = new Ext.ux.grid.RowActions({
-			header: 'Actions'
-			,actions: [
+			actions: [
 				{iconCls: 'icon-refresh', tooltip: 'Load tag value'}
-				,{iconCls: 'icon-delete', tooltip: 'Remove tag'}
+				,{iconCls: 'icon-tag-remove', tooltip: 'Remove tag'}
 			]
 			,callbacks:{
-				'icon-refresh': this.onRefresh.createDelegate(this)
-				,'icon-delete': this.onDeleteTag.createDelegate(this)
+				'icon-refresh': this.onRefreshRow.createDelegate(this)
+				,'icon-tag-remove': this.onDeleteTag.createDelegate(this)
 			}
 		});
 		this.columns = [
@@ -70,10 +69,10 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,onLoadAllTags: function(a){
 		this.store.each(this.setTag.createDelegate(this));
 	}
-	,onReload: function(){
+	,onRefresh: function(){
 		this.store.reload();
 	}
-	,onRefresh: function(g, r, action, row, col){
+	,onRefreshRow: function(g, r, action, row, col){
 		this.setTag(r);
 	}
 	,onDeleteTag: function(g, r, action, row, col){

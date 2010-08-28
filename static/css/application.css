@@ -1,18 +1,27 @@
 html,body{font:normal 12px verdana;margin:0;padding:0;border:0;overflow:hidden;height:100%;}
 .header .x-panel-body{background-color:#1E4176;}
 .instance-sandbox .header .x-panel-body{background-color:#e5c015;}
-h1{font:bold 16px tahoma,arial,sans-serif;color:white;margin:0;padding:5px;}
+h1{font:bold 16px tahoma,arial,sans-serif;color:white;margin:0;padding-left:5px;}
 
 #welcome h2{font-size:1.4em;margin-bottom:1em;}
+#welcome h3{font-size:1.2em;margin:1em 0 .5em;}
 #welcome strong{font-weight:bold;}
 #welcome p{margin-bottom:1em;}
 #welcome ul{margin-bottom:1em;}
 #welcome ul li{list-style:square;margin-left:2em;}
-#welcome .warning{border:2px solid #800;background-color:#f66;padding:10px;-moz-border-radius:4px;margin-bottom:1em;}
+#welcome .warning{border:2px solid #800;background-color:#f66;padding:10px;-moz-border-radius:4px;-webkit-border-radius:4px;margin-bottom:1em;}
+#welcome a{color:#69b;text-decoration:none;}
+#welcome a:hover{text-decoration:underline;}
 
 .icon-welcome{background-image:url(../images/icons/script.png)!important;}
 .icon-refresh{background-image:url(../images/icons/arrow_refresh.png)!important;}
 .icon-add{background-image:url(../images/icons/add.png)!important;}
 .icon-delete{background-image:url(../images/icons/delete.png)!important;}
 .icon-commit{background-image:url(../images/icons/database_save.png)!important;}
+.icon-fetch-all{background-image:url(../images/icons/arrow_down.png)!important;}
+.icon-tab-results{background-image:url(../images/icons/magnifier.png)!important;}
+.icon-tab-object{background-image:url(../images/icons/bricks.png)!important;}
+.icon-tag-add{background-image:url(../images/icons/tag_blue_add.png)!important;}
+.icon-tag-remove{background-image:url(../images/icons/tag_blue_delete.png)!important;}
 
+#namespacestree .x-tree-node-leaf .x-tree-node-icon{background-image:url(../images/icons/tag_blue.png)!important;}
