@@ -83,7 +83,7 @@ class Session(dict):
     #----------------------------------------------------------
     def invalidate(self):
         """Delete session data and cookie."""
-        self.rh.set_cookie(self._name, None)
+        self.rh.clear_cookie(self._name)
         memcache.delete(self._sid)
         self.clear()
         self._invalid=True

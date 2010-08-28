@@ -77,6 +77,7 @@ class RemoteHandler(BaseHandler):
             pass
 
         if action == 'namespacesfetch':
+            # TODO: output as dict and handle 401 Error
             namespace = self.get_argument('node')
             path = namespace + '/'
 
@@ -252,6 +253,7 @@ class RemoteHandler(BaseHandler):
 
         elif action == 'logout':
             self.session.invalidate()
+            self.write({"success": True})
 
 
 settings = {
