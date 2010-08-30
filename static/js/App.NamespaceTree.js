@@ -43,7 +43,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 					var tag = window.prompt('Tag name');
 					var desc = window.prompt('Description');
 					Ext.Ajax.request({
-						url: App.config.base_remote + 'createtag'
+						url: App.Config.base_remote + 'createtag'
 						,params: {path: path, tag: tag, description: desc}
 						,success: function(){loader.load(node,function(){node.expand();});}
 					});
