@@ -23,7 +23,9 @@ App.ObjectPanel = Ext.extend(Ext.Panel, {
 			,params: {oid: this.oid, tag: "fluiddb/about"}
 			,scope: this
 			,success: function(a){
-				txt = "Object ID: " + this.oid + "<br><br>About: " + a.responseText;
+				json = Ext.decode(a.responseText);
+
+				txt = "Object ID: " + this.oid + "<br><br>About: " + json.value;
 				txt += '<br><br><a href="http://abouttag.appspot.com/id/butterfly/'+this.oid+'" target="_blank">View visual representation</a>';
 				this.items.items[0].update(txt);
 				this.doLayout();

@@ -61,7 +61,8 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 			url: App.Config.base_remote + 'gettagvalue'
 			,params: {oid: r.data.oid, tag: "fluiddb/about"}
 			,success: function(a){
-				r.set('about', a.responseText);
+				json = Ext.decode(a.responseText);
+				r.set('about', json.value);
 				r.commit();
 			}
 		});

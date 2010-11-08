@@ -122,36 +122,45 @@ class RemoteHandler(BaseHandler):
                 k = k + 1
                 if k == 200:
                     break
+                readonly = True
                 if showTagValue:
                     try:
                         tagresponse = fluid.objects[oid][tag].get()
-                        if tagresponse.content_type == PRIMITIVE_CONTENT_TYPE:
+                        if tagresponse.content_type.startswith(PRIMITIVE_CONTENT_TYPE):
                             value = str(tagresponse.value)
+                            readonly = False
                         else:
-                            value = '<em>(Opaque value)</em>'
+                            value = '(Opaque value)'
                     except:
                         value = '...request error...'
                 else:
-                    value = "<em>Too many tags to fetch values</em>"
+                    value = "Too many tags to fetch values"
 
-                out.append({'tag': tag, 'value': value})
+                out.append({'tag': tag, 'value': value, 'readonly': readonly})
             self.write({'tags': out})
 
         elif action == 'gettagvalue':
             try:
+                readonly = True
                 oid = self.get_argument('oid')
                 tag = self.get_argument('tag')
                 tagresponse = fluid.objects[oid][tag].get()
-                if tagresponse.content_type == PRIMITIVE_CONTENT_TYPE:
+                if tagresponse.content_type.startswith(PRIMITIVE_CONTENT_TYPE):
                     if tagresponse.value is None:
-                        value = '<em>Empty</em>'
+                        type = 'empty'
+                        value = 'Empty'
+                        readonly = False
                     else:
+                        type = 'primitive'
                         value = str(tagresponse.value)
+                        readonly = False
                 else:
-                    value = '<em>(Opaque value)</em>'
-                self.write(value)
+                    type = 'opaque'
+                    value = tagresponse.content_type
+                self.write({'success':True, 'type':type, 'value':value,
+                    'readonly': readonly})
             except:
-                self.write("")
+                self.write({'success':False})
 
         elif action == 'tagobject':
             try:
