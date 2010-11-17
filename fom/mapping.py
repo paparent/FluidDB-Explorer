@@ -12,8 +12,26 @@
 
 import uuid
 
+from fom.db import ITERABLE_TYPES, SERIALIZABLE_TYPES
 from fom.session import Fluid
 from fom.errors import Fluid404Error
+
+
+def _get_tag_values(cls):
+    """Given a class will return a list containing the name and instance of
+    all the attributes that are of type readonly_tag_value
+    """
+    # Step 1. Create the list of matching fields associated with this klass
+    tags = [(name, instance)
+        for (name, instance) in cls.__dict__.items()
+        if isinstance(instance, readonly_tag_value)]
+    # Step 2. recursively loop over the parent classes of klass so we don't
+    # miss any fields *they* might have defined (like "about" in the Object
+    # class)
+    for b in cls.__bases__:
+        if issubclass(b, Object):
+            tags.extend(_get_tag_values(b))
+    return tags
 
 
 class SessionBound(object):
@@ -42,6 +60,7 @@ class Policy(object):
     """
     Represents a policy specification for permissions on an action
     """
+
     def __init__(self, policy='open', exceptions=[]):
         self.policy = policy
         self.exceptions = exceptions
@@ -56,6 +75,7 @@ class Permissions(object):
     """
     A nicer view onto Namespace/Tag/TagValue permissions
     """
+
     def __init__(self, api):
         """ api references an appropriately created ItemPermissionsApi
         instance
@@ -83,7 +103,8 @@ class Namespace(SessionBound):
 
     def __init__(self, path, fluid=None):
         super(Namespace, self).__init__(path, fluid)
-        self.permissions = Permissions(self.fluid.permissions.namespaces[self.path])
+        self.permissions = Permissions(
+            self.fluid.permissions.namespaces[self.path])
 
     def create(self, description):
         """Create this namespace.
@@ -148,7 +169,8 @@ class Namespace(SessionBound):
     def _get_description(self):
         """The description of this Namespace.
 
-        Setting and getting the value attempts to set/get the description in the FluidDB.
+        Setting and getting the value attempts to set/get the description in
+        FluidDB.
         """
         r = self.api.get(returnDescription=True)
         return r.value[u'description']
@@ -173,17 +195,13 @@ class Namespace(SessionBound):
     def tag_paths(self):
         """The full paths of the Tags in this Namespace
         """
-        return [
-            path_child(self.path, child) for child in self.tag_names
-        ]
+        return [path_child(self.path, child) for child in self.tag_names]
 
     @property
     def tags(self):
         """The Tags in this Namespace
         """
-        return [
-            Tag(path) for path in self.tag_paths
-        ]
+        return [Tag(path) for path in self.tag_paths]
 
     @property
     def namespace_names(self):
@@ -196,17 +214,13 @@ class Namespace(SessionBound):
     def namespace_paths(self):
         """The full paths of the child Namespaces in this Namespace
         """
-        return [
-            path_child(self.path, child) for child in self.namespace_names
-        ]
+        return [path_child(self.path, child) for child in self.namespace_names]
 
     @property
     def namespaces(self):
         """The child Namespaces in this Namespace
         """
-        return [
-            Namespace(path) for path in self.namespace_paths
-        ]
+        return [Namespace(path) for path in self.namespace_paths]
 
 
 class Tag(SessionBound):
@@ -215,7 +229,8 @@ class Tag(SessionBound):
     def __init__(self, path, fluid=None):
         super(Tag, self).__init__(path, fluid)
         self.permissions = Permissions(self.fluid.permissions.tags[self.path])
-        self.value_permissions = Permissions(self.fluid.permissions.tag_values[self.path])
+        self.value_permissions = Permissions(
+            self.fluid.permissions.tag_values[self.path])
 
     @property
     def api(self):
@@ -263,6 +278,7 @@ class readonly_tag_value(object):
     :param tagpath: The path of the tag to store this value in and read it
                     from
     """
+
     def __init__(self, tagpath, cached=True):
         self.tagpath = tagpath
         self.cached = cached
@@ -277,44 +293,80 @@ class readonly_tag_value(object):
         return value
 
 
-
 class tag_value(readonly_tag_value):
     """Descriptor to provide a tag value lookup on an object to simulate a
     simple attribute. With write support.
 
     :param tagpath: The path of the tag to store this value in and read it
                     from
+
+    :param content_type: The default MIME-type to be used when PUTting the
+                         value
+
+    :param cached: Flag to indicate if the value should be cached locally
+
+    :param lazy_save: Flag to indicate if the field's value should be updated
+                      when the instance.save() method is called
     """
-    def __init__(self, tagpath, content_type=None, cached=True):
+
+    def __init__(self, tagpath, content_type=None, cached=True,
+        lazy_save=True):
         """
         content_type argument sets the default mime-type to be used when
         PUTting the value
         """
         super(tag_value, self).__init__(tagpath, cached)
         self.content_type = content_type
+        self.lazy_save = lazy_save
 
     def __set__(self, instance, value):
-        return instance.set(self.tagpath, value, self.content_type)
-
+        if self.lazy_save:
+            instance.set_lazy_tag_value(self, value)
+        else:
+            return instance.set(self.tagpath, value, self.content_type)
 
 
 class Object(SessionBound):
     """An object
     """
+
     about = readonly_tag_value(u'fluiddb/about')
 
-    def __init__(self, uid=None, about=None, fluid=None):
+    def __init__(self, uid=None, about=None, fluid=None, initial={}):
+        # the object's UUID
         self.uid = uid
         self.fluid = fluid or Fluid.bound
+        # Create the _path_map dict for the instantiated class
+        self._path_map = {}
+        for attribute, tag in _get_tag_values(self.__class__):
+            self._path_map[tag.tagpath] = attribute
+        # check about isn't in the initial values
+        if 'fluiddb/about' in initial:
+            if about is None:
+                about = initial['fluiddb/about']['value']
+                del initial['fluiddb/about']
+        # react appropriately to an about value
         if about is not None:
             self.create(about)
+        # cache for tag values
         self._cache = {}
+        # a list of fields whose value has been updated but not saved
+        self._dirty_fields = set()
+        # if there are some initial values then set them for the appropriate
+        # fields in this object (using the _path_map created above)
+        # keys = tag paths, e.g. "fluiddb/about"
+        # values = initial values, e.g. any FluidDB primitive type value
+        # see: http://api.fluidinfo.com/html/api.html#values_GET
+        for tag_path, value in initial.iteritems():
+            if 'value' in value:
+                setattr(self, self._path_map[tag_path], value['value'])
 
     def create(self, about=None):
         """Create a new object.
         """
         r = self.fluid.objects.post(about)
         self.uid = r.value[u'id']
+        self.about = about
 
     def get(self, tagpath):
         """Get the value of a tag.
@@ -329,6 +381,9 @@ class Object(SessionBound):
         return self._cache.get(tagpath)
 
     def refresh(self, *tagpaths):
+        """
+        Clears the local cache
+        """
         if tagpaths:
             for tagpath in tagpaths:
                 del self._cache[tagpath]
@@ -339,10 +394,68 @@ class Object(SessionBound):
         """Set the value of a tag.
         """
         self._cache[tagpath] = value
-        self.api[tagpath].put(value, valueType)
+        # check if updating a tag handled by one of the tag_value attributes
+        if tagpath in self._path_map:
+            # get the tag_value instance
+            tv = self.__class__.__dict__[self._path_map[tagpath]]
+            if tv.lazy_save:
+                # update on save()
+                self.set_lazy_tag_value(tv, value)
+            else:
+                # update right now
+                self.api[tagpath].put(value, valueType)
+        else:
+            # the tag isn't associated with a tag_value on this object
+            self.api[tagpath].put(value, valueType)
+
+    def set_lazy_tag_value(self, tag_value, value):
+        """Sets the value of the given tag_value instance to be pushed to
+        FluidDB only when save() is called
+        """
+        # validate that the value is a primitive type (the only sort allowed
+        # by the /values api)
+        pt = type(value)
+        if pt in SERIALIZABLE_TYPES:
+            if pt in ITERABLE_TYPES:
+                if not all(isinstance(x, basestring) for x in value):
+                    # it was a list like structure that contained more than
+                    # just strings
+                    raise ValueError('Cannot lazy-save a non-primitive value.')
+        else:
+            raise ValueError('Cannot lazy-save a non-primitive value.')
+        # store away for when the save() method is called
+        self._dirty_fields.add(tag_value)
+        self._cache[tag_value.tagpath] = value
 
     def delete(self, tagpath):
+        """Removes a tag from the object
+        """
         self.api[tagpath].delete()
+
+    def save(self):
+        """Saves those fields that have been updated
+        """
+        if not self.about:
+            raise ValueError(
+                "Cannot save for an object without an about value")
+        if self._dirty_fields:
+            # values is the dict that will become the PUT payload to /values
+            values = {}
+            for item in self._dirty_fields:
+                tagpath = item.tagpath
+                # This check is done so the tag_relational capabilities work
+                # properly (i.e. the __get__ will return an instance of an
+                # object whose UUID should be referenced)
+                val = item.__get__(self, self.__class__)
+                if isinstance(item, tag_relation):
+                    val = val.uid
+                values[tagpath] = {'value': val}
+            # use the unique about value to identify this object in FluidDB
+            query = 'fluiddb/about = "%s"' % self.about
+            # update the values using the /values api
+            self.fluid.values.put(query, values)
+            # none of the fields are now dirty
+            self._dirty_fields.clear()
 
     @property
     def api(self):
@@ -398,8 +511,8 @@ class tag_relation(tag_value):
     An id is actually stored in the database.
     """
 
-    def __init__(self, tag, object_type=Object, cached=True):
-        tag_value.__init__(self, tag, cached=cached)
+    def __init__(self, tag, object_type=Object, cached=True, lazy_save=True):
+        tag_value.__init__(self, tag, cached=cached, lazy_save=lazy_save)
         self.object_type = object_type
 
     def __get__(self, instance, owner):
@@ -415,8 +528,10 @@ class tag_relations(tag_value):
 
     A list of ids are stored in the database
     """
-    def __init__(self, tagpath, object_type=Object, cached=True):
-        tag_value.__init__(self, tagpath, cached=cached)
+
+    def __init__(self, tagpath, object_type=Object, cached=True,
+            lazy_save=True):
+        tag_value.__init__(self, tagpath, cached=cached, lazy_save=lazy_save)
         self.object_type = object_type
 
     def __get__(self, instance, owner):
@@ -483,9 +598,10 @@ class CollectionManager(object):
         return tagpath
 
     def _generate_uid(self):
-        url = '%s/%s' % (self.instance.fluid.db._get_url(self.instance.api.url),
-                         self.tagpath)
-        uid = unicode(uuid.uuid5(uuid.NAMESPACE_URL, str(url))).replace('-', '')
+        url = '%s/%s' % (self.instance.fluid.db._get_url(
+                            self.instance.api.url), self.tagpath)
+        uid = unicode(
+            uuid.uuid5(uuid.NAMESPACE_URL, str(url))).replace('-', '')
         return uid
 
     def _fetch(self):
@@ -500,8 +616,9 @@ class CollectionManager(object):
 class tag_collection(tag_value):
 
     def __init__(self, tagpath, map_type=Object,
-                 manager_type=CollectionManager, foreign_tagpath=None):
-        tag_value.__init__(self, tagpath)
+                 manager_type=CollectionManager, foreign_tagpath=None,
+                 lazy_save=True):
+        tag_value.__init__(self, tagpath, lazy_save=True)
         self.map_type = map_type
         self.manager_type = manager_type
         self.foreign_tagpath = foreign_tagpath
@@ -511,7 +628,6 @@ class tag_collection(tag_value):
             raise ValueError(u'This object has not been created.')
         return self.manager_type(instance, self.tagpath, self.map_type,
                                  self.foreign_tagpath)
-
 
 
 def path_child(path, child):

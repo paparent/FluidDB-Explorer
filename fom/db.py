@@ -29,7 +29,8 @@
         Content types which can be deserialized
 """
 
-import types, urllib
+import types
+import urllib
 
 import httplib2
 
@@ -50,22 +51,31 @@ from version import version
 BASE_URL = 'https://fluiddb.fluidinfo.com'
 NO_CONTENT = object()
 PRIMITIVE_CONTENT_TYPE = 'application/vnd.fluiddb.value+json'
-DESERIALIZABLE_CONTENT_TYPES = set((PRIMITIVE_CONTENT_TYPE, 'application/json'))
+DESERIALIZABLE_CONTENT_TYPES = set(
+    (PRIMITIVE_CONTENT_TYPE, 'application/json'))
 ITERABLE_TYPES = set((list, tuple))
 SERIALIZABLE_TYPES = set((types.NoneType, bool, int, float, str, unicode,
                           list, tuple))
+
 
 def _generate_endpoint_url(base, path, urlargs):
     if isinstance(path, unicode):
         path = path.encode('utf-8')
     url = ''.join([base, urllib.quote(path)])
     if urlargs:
+        if isinstance(urlargs, dict):
+            # convert the dict to tuple pairs
+            urlargs = tuple(urlargs.items())
         # make sure we handle unicode characters as possible values
         # NOTE: only use UTF-8 unicode for urlargs values. Anything else will
         # break.
-        for key, value in urlargs.iteritems():
+        clean_urlargs = []
+        for (tag, value) in urlargs:
             if isinstance(value, unicode):
-                urlargs[key] = value.encode('utf-8')
+                clean_urlargs.append((tag, value.encode('utf-8')))
+            else:
+                clean_urlargs.append((tag, value))
+        urlargs = tuple(clean_urlargs)
         url = '?'.join([url, urllib.urlencode(urlargs)])
     return url
 
@@ -144,8 +154,8 @@ class FluidResponse(object):
             raise_error(self)
 
     def __repr__(self):
-        return '<FluidResponse (%s, %r, %r, %r)>' % (self.status, self.content_type,
-                                                     self.error, self.value)
+        return '<FluidResponse (%s, %r, %r, %r)>' % (self.status,
+            self.content_type, self.error, self.value)
 
     __str__ = __repr__
 
@@ -192,11 +202,11 @@ class FluidDB(object):
         :param payload: The body of the request
         :param urlargs: URL arguments to be applied to the request
         :param content_type: The content type of the payload
-        :param is_value: A boolean flag to indicate whether the response is from a
-            *value* request. Value requests are not deserialized unless they are
-            of the primitive content type: `application/vnd.fluiddb.value+json`
-            even if they are of a deserializable content type such as
-            `application/json`
+        :param is_value: A boolean flag to indicate whether the response is
+            from a *value* request. Value requests are not deserialized unless
+            they are of the primitive content type:
+            `application/vnd.fluiddb.value+json` even if they are of a
+            deserializable content type such as `application/json`
         """
         req, params = self._build_request(method, path, payload, urlargs,
                                           content_type)

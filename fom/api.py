@@ -76,6 +76,96 @@ class UsersApi(ApiBase):
         return UserApi(key, self.db)
 
 
+class AboutObjectTagApi(ApiBase):
+    """API component for a tag on an object referenced by its about tag value.
+
+    .. seealso:: `<http://api.fluidinfo.com/html/api.html#about>`_
+    """
+
+    root_path = '/about'
+
+    def __init__(self, about, tagpath, db):
+        self.about = about
+        self.path = '/'.join([self.about, tagpath])
+        self.db = db
+
+    def get(self):
+        """Call GET on an individual object's tag.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about>`_
+        """
+        return self('GET', self.path, is_value=True)
+
+    def head(self):
+        """Call HEAD on an individial object's tag.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about_HEAD>`_
+        """
+        return self('HEAD', self.path)
+
+    def delete(self):
+        """Call DELETE on an individual object's tag.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about_DELETE>`_
+        """
+        return self('DELETE', self.path)
+
+    def put(self, value, value_type=None):
+        """Call PUT on an individual object's tag.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about_PUT>`_
+        """
+        return self('PUT', self.path, payload=value, content_type=value_type)
+
+
+class AboutObjectApi(ApiBase):
+    """API component for a single object referenced by its about tag value.
+
+    .. seealso:: `http://api.fluidinfo.com/html/api.html#about`_
+    """
+
+    root_path = '/about'
+
+    def __init__(self, about, db):
+        self.about = about
+        self.db = db
+
+    def get(self):
+        """Call GET on an individual object.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about_GET>`_
+        """
+        return self('GET', self.about)
+
+    def __getitem__(self, tagpath):
+        return AboutObjectTagApi(self.about, tagpath, self.db)
+
+    @property
+    def url(self):
+        return self._make_path(self.about)
+
+
+class AboutObjectsApi(ApiBase):
+    """API Component for the /about toplevel
+    """
+
+    root_path = '/about'
+
+    def post(self, about):
+        """Call POST on the /about toplevel to create a new object.
+
+        :param about: The value for the `about` tag.
+
+        .. seealso:: `<http://api.fluidinfo.com/html/api.html#about_POST>`_
+        """
+        return self('POST', path=about)
+
+    def __getitem__(self, key):
+        """Dict-like access for objects by about tag value.
+        """
+        return AboutObjectApi(key, self.db)
+
+
 class ObjectTagApi(ApiBase):
     """API component for a tag on an object.
 
@@ -135,7 +225,7 @@ class ObjectApi(ApiBase):
 
         .. seealso:: `<http://api.fluidinfo.com/fluidDB/api/*/objects/GET>`_
         """
-        return self('GET', self.uid, urlargs={'showAbout':showAbout})
+        return self('GET', self.uid, urlargs={'showAbout': showAbout})
 
     def __getitem__(self, tagpath):
         return ObjectTagApi(self.uid, tagpath, self.db)
@@ -193,7 +283,6 @@ class NamespaceApi(ApiBase):
 
     root_path = '/namespaces'
 
-
     def __init__(self, path, db):
         self.db = db
         self.path = path
@@ -218,7 +307,8 @@ class NamespaceApi(ApiBase):
 
         .. seealso:: `<http://api.fluidinfo.com/fluidDB/api/*/namespaces/POST>`_
         """
-        return self('POST', self.path, {'name':name, 'description':description})
+        return self('POST', self.path,
+            {'name': name, 'description': description})
 
     def delete(self):
         """
@@ -266,8 +356,8 @@ class TagApi(ApiBase):
             urlargs={u'returnDescription': returnDescription})
 
     def post(self, name, description, indexed):
-        return self('POST', self.path, payload=
-            {u'name': name, u'description': description, u'indexed': indexed})
+        return self('POST', self.path, payload={u'name': name,
+            u'description': description, u'indexed': indexed})
 
     def delete(self):
         return self('DELETE', self.path)
@@ -365,7 +455,7 @@ class PolicyApi(ApiBase):
             `<http://api.fluidinfo.com/fluidDB/api/*/policies/PUT>`_
         """
         return self('PUT', self.path, payload={u'policy': policy,
-                                               u'exceptions':exceptions})
+                                               u'exceptions': exceptions})
 
 
 class PoliciesApi(ApiBase):
@@ -379,6 +469,43 @@ class PoliciesApi(ApiBase):
         if len(key) == 3:
             username, category, action = key
             return PolicyApi(username, category, action, self.db)
+
+
+class ValuesApi(ApiBase):
+    """API Component for the /values toplevel
+    """
+
+    root_path = '/values'
+
+    def get(self, query, taglist):
+        """Call GET on the /values toplevel with a supplied query and list of
+        tags to return.
+
+        .. see also:: `<http://api.fluidinfo.com/html/api.html#values_GET>`_
+        """
+        urlargsList = [('query', query)]
+        urlargsList.extend([('tag', tag_name) for tag_name in taglist])
+        urlargs = tuple(urlargsList)
+        return self('GET', urlargs=urlargs)
+
+    def put(self, query, values):
+        """Call PUT on the /values toplevel with a supplied query and payload
+        indicating new/updated tag-values.
+
+        .. see also: `<http://api.fluidinfo.com/html/api.html#values_PUT>`_
+        """
+        return self('PUT', urlargs={'query': query}, payload=values)
+
+    def delete(self, query, taglist):
+        """Call DELETE on the /values toplevel with a supplied query and
+        list of tags to delete
+
+        .. see also: `<http://api.fluidinfo.com/html/api.html#values_DELETE>`_
+        """
+        urlargsList = [('query', query)]
+        urlargsList.extend([('tag', tag_name) for tag_name in taglist])
+        urlargs = tuple(urlargsList)
+        return self('DELETE', urlargs=urlargs)
 
 
 class FluidApi(ApiBase):
@@ -420,6 +547,8 @@ class FluidApi(ApiBase):
         self.tags = TagsApi(self.db)
         self.namespaces = NamespacesApi(self.db)
         self.users = UsersApi(self.db)
+        self.about = AboutObjectsApi(self.db)
         self.objects = ObjectsApi(self.db)
         self.permissions = PermissionsApi(self.db)
         self.policies = PoliciesApi(self.db)
+        self.values = ValuesApi(self.db)
