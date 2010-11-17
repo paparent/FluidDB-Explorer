@@ -93,21 +93,16 @@ class RemoteHandler(BaseHandler):
 
         elif action == 'query':
             querystr = self.get_argument('query')
-            response = fluid.objects.get(querystr)
-            ids = response.value['ids']
+            response = fluid.values.get(querystr, ('fluiddb/about',))
+            ids = response.value['results']
 
+            # TODO: Actually, the results could be passed right away.
             out = []
-            showAbout = False if len(ids) > 30 else True
             for objid in ids:
-                if showAbout:
-                    try:
-                        about = \
-                            fluid.objects[objid]['fluiddb/about'].get().value
-                    except Fluid404Error:
-                        about = 'no about tag'
-                else:
-                    about = '<em>too many objects (more than 30) to fetch ' \
-                            'about tag</em>'
+                try:
+                    about = ids[objid]['fluiddb/about']['value']
+                except KeyError:
+                    about = 'no about tag'
                 out.append({'oid': objid, 'about': about})
             self.write({'ids': out})
 
