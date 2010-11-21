@@ -16,7 +16,9 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import random
-from google.appengine.api import memcache
+import memcache as mc
+
+memcache = mc.Client(['127.0.0.1:11211'], debug=0)
 
 _sidChars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 _defaultTimeout=30*60 # 30 min

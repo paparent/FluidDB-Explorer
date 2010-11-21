@@ -4,14 +4,14 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>FluidDB Explorer</title>
 
-	<link rel="stylesheet" type="text/css" href="{{ static_url("extjs/resources/css/ext-all.css") }}">
-	<link rel="stylesheet" type="text/css" href="{{ static_url("css/application.css") }}">
-	<link rel="stylesheet" type="text/css" href="{{ static_url("css/Ext.ux.grid.RowActions.css") }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename="extjs/resources/css/ext-all.css") }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename="css/application.css") }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename="css/Ext.ux.grid.RowActions.css") }}">
 
 </head>
 <body class="instance-{{ instance }}">
 
-	<div id="logo"><h1>FluidDB Explorer{% if instance == 'sandbox' %} (sandbox){% end %}</h1></div>
+	<div id="logo"><h1>FluidDB Explorer{% if instance == 'sandbox' %} (sandbox){% endif %}</h1></div>
 
 <div id="welcome" class="x-hidden">
 	<a href="http://github.com/paparent/FluidDB-Explorer"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
@@ -21,7 +21,7 @@
 	<div class="warning">
 		<strong>Important:</strong> The namespace tree that usually appears on the left has been disabled because you didn't put a starting namespace in the url. Read on to learn more.
 	</div>
-	{% end %}
+	{% endif %}
 	<h3>What is FluidDB Explorer ?</h3>
 	<p>With this tool you can quickly navigate in <a href="http://www.fluidinfo.com/fluiddb" target="_blank">FluidDB</a>, using either the namespace tree or via <a href="http://doc.fluidinfo.com/fluidDB/queries.html" target="_blank">FluidDB queries</a>.</p>
 	<p>You can explore either the main FluidDB instance (the default), or the sandbox, at: <a href="http://fluiddbexplorer.appspot.com/sandbox/">http://fluiddbexplorer.appspot.com/sandbox/</a></p>
@@ -48,12 +48,12 @@
 	</ul>
 </div>
 
-{% if handler.settings["debug"] %}
-<script type="text/javascript" src="{{ static_url("extjs/adapter/ext/ext-base.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("extjs/ext-all-debug.js") }}"></script>
+{% if config.DEBUG %}
+<script type="text/javascript" src="{{ url_for('static', filename="extjs/adapter/ext/ext-base.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="extjs/ext-all-debug.js") }}"></script>
 {% else %}
-<script type="text/javascript" src="{{ static_url("ext.js") }}"></script>
-{% end %}
+<script type="text/javascript" src="{{ url_for('static', filename="ext.js") }}"></script>
+{% endif %}
 
 <script type="text/javascript">
 	Ext.ns('App', 'App.Config');
@@ -63,22 +63,22 @@
 	App.Config.base_remote = "/remote/{{ instance }}/";
 </script>
 
-{% if handler.settings["debug"] %}
-<script type="text/javascript" src="{{ static_url("js/miframe.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/Ext.ux.grid.RowActions.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.QueryField.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.MainPanel.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.ObjectPanel.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.NamespaceTree.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.TagValuesGrid.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.Login.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.ResultsGrid.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.PermissionsPanel.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/App.LoginWindow.js") }}"></script>
-<script type="text/javascript" src="{{ static_url("js/application.js") }}"></script>
+{% if config.DEBUG %}
+<script type="text/javascript" src="{{ url_for('static', filename="js/miframe.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/Ext.ux.grid.RowActions.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.QueryField.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.MainPanel.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.ObjectPanel.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.NamespaceTree.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.TagValuesGrid.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.Login.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.ResultsGrid.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.PermissionsPanel.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/App.LoginWindow.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/application.js") }}"></script>
 {% else %}
-<script type="text/javascript" src="{{ static_url("fluiddbexplorer.js") }}"></script>
-{% end %}
+<script type="text/javascript" src="{{ url_for('static', filename="fluiddbexplorer.js") }}"></script>
+{% endif %}
 
 </body>
 </html>

@@ -1,4 +1,4 @@
+local_settings.py
 static/ext.js
 static/fluiddbexplorer.js
-index.yaml
 *.pyc
