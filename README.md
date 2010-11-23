@@ -21,7 +21,6 @@ FluidDB Explorer uses these:
 * [FluidDB](http://www.fluidinfo.com/fluiddb)
 * [FOM](http://bitbucket.org/aafshar/fom-main/wiki/Home)
 * [ExtJS](http://www.extjs.com)
-* [Tornado](http://www.tornadoweb.org/)
-* [Google App Engine](http://code.google.com/appengine/)
-* [Python](http://python.org)
-
+* [Flask](http://flask.pocoo.org)
+* [Gunicorn](http://gunicorn.org)
+* [nginx](http://nginx.org)
