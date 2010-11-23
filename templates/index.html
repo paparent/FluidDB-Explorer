@@ -8,6 +8,12 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename="css/application.css") }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename="css/Ext.ux.grid.RowActions.css") }}">
 
+{% if config.GOOGLE_ANALYTICS_CODE %}
+<script type="text/javascript">
+var _gaq=_gaq||[];_gaq.push(['_setAccount','{{ config.GOOGLE_ANALYTICS_CODE }}']);_gaq.push(['_trackPageview']);
+(function(){var ga=document.createElement('script');ga.type='text/javascript';ga.async=true;ga.src=('https:'==document.location.protocol?'https://ssl':'http://www')+'.google-analytics.com/ga.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);})();
+</script>
+{% endif %}
 </head>
 <body class="instance-{{ instance }}">
 
@@ -61,6 +67,11 @@
 	App.Config.rootlabel = "{{ rootlabel }}";
 	App.Config.rootid = "{{ rootid }}";
 	App.Config.base_remote = "/remote/{{ instance }}/";
+{% if config.GOOGLE_ANALYTICS_CODE %}
+	Ext.Ajax.on('requestcomplete', function(c, r, o){
+		_gaq.push(['_trackPageview', o.url]);
+	});
+{% endif %}
 </script>
 
 {% if config.DEBUG %}
