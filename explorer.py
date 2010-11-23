@@ -36,7 +36,7 @@ def index():
 def splash(instance):
     username = session.get('username', 'Anonymous')
     if username != 'Anonymous':
-        return redirect(url_for('main', instance=instance, username=username))
+        return redirect(url_for('main', instance=instance, rootns=username))
     else:
         return render_template("index.html",
             username=username,
