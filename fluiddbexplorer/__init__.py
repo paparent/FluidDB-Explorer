@@ -1,12 +1,21 @@
+"""
+fluiddbexplorer
+~~~~~~~~~~~~~~~
+
+:copyright: 2010 FluidDB Explorer Authors
+:license: MIT, see LICENSE for more information
+"""
+
 from flask import Flask, json, redirect, render_template, request, session, url_for
 
 from fom.session import Fluid
 from fom.db import PRIMITIVE_CONTENT_TYPE
 from fom.errors import FluidError
 
+from fluiddbexplorer import local_settings
 
 app = Flask(__name__)
-app.config.from_object('local_settings')
+app.config.from_object(local_settings)
 
 
 INSTANCE_URL = {
@@ -249,7 +258,3 @@ def remote(instance, action):
         session.pop('username', None)
         session.pop('password', None)
         return json.dumps({"success": True})
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0')

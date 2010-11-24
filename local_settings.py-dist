@@ -1,3 +1,0 @@
-DEBUG = False
-SECRET_KEY = '--Generate a key--'
-BASE_URL = 'http://'

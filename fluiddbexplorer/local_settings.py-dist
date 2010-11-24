@@ -1,0 +1,13 @@
+"""
+fluiddbexplorer.local_settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configuration file
+
+:copyright: 2010 FluidDB Explorer Authors
+:license: MIT, see LICENSE for more information
+"""
+
+DEBUG = False
+SECRET_KEY = '--Generate a key--'
+BASE_URL = 'http://'
