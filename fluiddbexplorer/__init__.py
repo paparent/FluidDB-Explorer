@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 fluiddbexplorer
 ~~~~~~~~~~~~~~~
 
-:copyright: 2010 FluidDB Explorer Authors
+:copyright: 2010 by FluidDB Explorer Authors
 :license: MIT, see LICENSE for more information
 """
 
-from flask import Flask, json, redirect, render_template, request, session, url_for
+from flask import Flask, json, redirect, render_template, request, \
+                  session, url_for
 
 from fom.session import Fluid
 from fom.db import PRIMITIVE_CONTENT_TYPE
@@ -48,25 +50,23 @@ def splash(instance):
         return redirect(url_for('main', instance=instance, rootns=username))
     else:
         return render_template("index.html",
-            username=username,
-            rootlabel='FluidDB',
-            instance=instance,
-            rootid='nstree-disabled'
-        )
+                               username=username,
+                               rootlabel='FluidDB',
+                               instance=instance,
+                               rootid='nstree-disabled')
 
 
 @app.route('/<instance>/<path:rootns>')
 def main(instance, rootns):
     rootns = rootns.rstrip('/')
     return render_template("index.html",
-        username=session.get('username', 'Anonymous'),
-        rootlabel=rootns,
-        instance=instance,
-        rootid=(rootns or 'nstree-disabled')
-    )
+                           username=session.get('username', 'Anonymous'),
+                           rootlabel=rootns,
+                           instance=instance,
+                           rootid=(rootns or 'nstree-disabled'))
 
 
-@app.route('/remote/<instance>/<action>', methods=['POST',])
+@app.route('/remote/<instance>/<action>', methods=['POST'])
 def remote(instance, action):
     fluid = Fluid(get_instance_url(instance))
 
@@ -82,7 +82,8 @@ def remote(instance, action):
         namespace = request.form.get('node', '')
         path = namespace + '/'
 
-        response = fluid.namespaces[namespace].get(returnNamespaces=True, returnTags=True)
+        response = fluid.namespaces[namespace].get(returnNamespaces=True,
+                                                   returnTags=True)
 
         out = []
         for nss in response.value['namespaceNames']:
@@ -152,9 +153,10 @@ def remote(instance, action):
             else:
                 type = 'opaque'
                 value = tagresponse.content_type
-            return json.dumps({'success':True, 'type':type, 'value':value, 'readonly': readonly})
+            return json.dumps({'success': True, 'type': type, 'value': value,
+                             'readonly': readonly})
         except:
-            return json.dumps({'success':False})
+            return json.dumps({'success': False})
 
     elif action == 'tagobject':
         try:
@@ -239,10 +241,12 @@ def remote(instance, action):
             exceptions = json.loads(request.form.get('exceptions'))
             if type == 'ns':
                 response = fluid.permissions.namespaces[path].put(action,
-                        policy, exceptions)
+                                                                  policy,
+                                                                  exceptions)
             else:
                 response = fluid.permissions.tag_values[path].put(action,
-                        policy, exceptions)
+                                                                  policy,
+                                                                  exceptions)
             return json.dumps(response)
         except:
             return
