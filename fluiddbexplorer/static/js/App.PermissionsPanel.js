@@ -17,8 +17,7 @@ App.PermissionsPanel = Ext.extend(Ext.Panel, {
 		else {
 			title = 'Tag Permissions: ' + this.path;
 			this.items = [
-				 {xtype: 'app.permpanel', type:'tag-see', path: this.path}
-				,{xtype: 'app.permpanel', type:'tag-create', path: this.path}
+				{xtype: 'app.permpanel', type:'tag-create', path: this.path}
 				,{xtype: 'app.permpanel', type:'tag-read', path: this.path}
 				,{xtype: 'app.permpanel', type:'tag-delete', path: this.path}
 			];
