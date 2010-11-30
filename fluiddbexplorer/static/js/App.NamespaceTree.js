@@ -25,36 +25,20 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 				case 'ns-create-namespace':
 					var namespace = window.prompt('Namespace name');
 					var desc = window.prompt('Description');
-					Ext.Ajax.request({
-						url: App.Config.base_remote + 'createnamespace'
-						,params: {path: path, namespace: namespace, description: desc}
-						,success: function(){loader.load(node,function(){node.expand();});}
-					});
+					direct.CreateNamespace(path, namespace, desc, function(){loader.load(node,function(){node.expand();});});
 					break;
 				case 'ns-delete-namespace':
 					parentNode = node.parentNode;
-					Ext.Ajax.request({
-						url: App.Config.base_remote + 'deletenamespace'
-						,params: {namespace: path}
-						,success: function(){loader.load(parentNode,function(){parentNode.expand();});}
-					});
+					direct.DeleteNamespace(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
 					break;
 				case 'ns-create-tag':
 					var tag = window.prompt('Tag name');
 					var desc = window.prompt('Description');
-					Ext.Ajax.request({
-						url: App.Config.base_remote + 'createtag'
-						,params: {path: path, tag: tag, description: desc}
-						,success: function(){loader.load(node,function(){node.expand();});}
-					});
+					direct.CreateTag(path, tag, desc, function(){loader.load(node,function(){node.expand();});});
 					break;
 				case 'ns-delete-tag':
 					parentNode = node.parentNode;
-					Ext.Ajax.request({
-						url: App.Config.base_remote + 'deletetag'
-						,params: {tag: path}
-						,success: function(){loader.load(parentNode,function(){parentNode.expand();});}
-					});
+					direct.DeleteTag(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
 					break;
 				case 'ns-permission':
 					node.getOwnerTree().fireEvent('permission', path, node.leaf?'tag':'ns');
@@ -66,7 +50,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 	,initComponent: function(){
 		this.addEvents('tagclick');
 		this.loader = new Ext.tree.TreeLoader({
-			url: App.Config.base_remote + 'namespacesfetch'
+			directFn: direct.NamespacesFetch
 		});
 
 		this.tbar = [

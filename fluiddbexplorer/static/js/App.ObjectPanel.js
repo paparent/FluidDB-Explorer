@@ -18,18 +18,13 @@ App.ObjectPanel = Ext.extend(Ext.Panel, {
 		App.ObjectPanel.superclass.afterRender.apply(this, arguments);
 		this.body.on('click', this.onClick, this);
 
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'gettagvalue'
-			,params: {oid: this.oid, tag: "fluiddb/about"}
-			,scope: this
-			,success: function(a){
-				json = Ext.decode(a.responseText);
+		var panel = this;
 
-				txt = "Object ID: " + this.oid + "<br><br>About: " + json.value;
-				txt += '<br><br><a href="http://abouttag.appspot.com/id/butterfly/'+this.oid+'" target="_blank">View visual representation</a>';
-				this.items.items[0].update(txt);
-				this.doLayout();
-			}
+		direct.GetTagValue(this.oid, "fluiddb/about", function(json){
+			txt = "Object ID: " + panel.oid + "<br><br>About: " + json.value;
+			txt += '<br><br><a href="http://abouttag.appspot.com/id/butterfly/'+panel.oid+'" target="_blank">View visual representation</a>';
+			panel.items.items[0].update(txt);
+			panel.doLayout();
 		});
 	}
 	,onClick: function(e, target){

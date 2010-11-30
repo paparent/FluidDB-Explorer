@@ -72,18 +72,13 @@ App.PermPanel = Ext.extend(Ext.Panel, {
 		this.doLoad();
 	}
 	,doLoad: function() {
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'getperm'
-			,params: {type: this.infos[0], action: this.infos[1], path: this.path}
-			,success: function(a){
-				var perm = Ext.util.JSON.decode(a.responseText);
-				this.storeExceptions.loadData(perm.exceptions);
-				var elp = Ext.getCmp(this.policyEl);
-				elp.add({border:false,html:"Policy: " + perm.policy});
+		var panel = this, type = this.infos[0], action = this.infos[1];
+		direct.GetPerm(type, action, this.path, function(perm){
+				panel.storeExceptions.loadData(perm.exceptions);
+				var elp = Ext.getCmp(panel.policyEl);
+				elp.add({border: false, html: "Policy: " + perm.policy});
 				elp.doLayout();
-				this.policy = perm.policy;
-			}
-			,scope:this
+				panel.policy = perm.policy;
 		});
 	}
 	,onPolicyToggle: function() {
@@ -104,14 +99,10 @@ App.PermPanel = Ext.extend(Ext.Panel, {
 		this.storeExceptions.loadData(new Array(username), true);
 	}
 	,onCommit: function() {
+		var type = this.infos[0], action = this.infos[1];
 		this.exceptions = new Array();
 		this.storeExceptions.each(function(r){this.exceptions.push(r.data.field1);}, this);
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'setperm'
-			,params: {type: this.infos[0], action: this.infos[1], path: this.path, policy: this.policy, exceptions: Ext.util.JSON.encode(this.exceptions)}
-			,success: function(a){
-			}
-		});
+		direct.SetPerm(type, action, this.path, this.policy, this.exceptions);
 	}
 });
 

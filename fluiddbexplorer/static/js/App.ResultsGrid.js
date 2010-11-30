@@ -8,8 +8,10 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,viewConfig: {emptyText: 'Nothing to display'}
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
-		this.store = new Ext.data.JsonStore({
-			url: App.Config.base_remote + 'query'
+		this.store = new Ext.data.DirectStore({
+			directFn: direct.Query
+			,paramsAsHash: false
+			,paramOrder: 'query'
 			,autoDestroy: true
 			,root: 'ids'
 			,fields: ['oid', 'about']
@@ -57,14 +59,9 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	}
 	,setAboutTag: function(r){
 		r.set('about', '<em>loading...</em>');
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'gettagvalue'
-			,params: {oid: r.data.oid, tag: "fluiddb/about"}
-			,success: function(a){
-				json = Ext.decode(a.responseText);
-				r.set('about', json.value);
-				r.commit();
-			}
+		direct.GetTagValue(r.data.oid, "fluiddb/about", function(json){
+			r.set('about', json.value);
+			r.commit();
 		});
 	}
 });
