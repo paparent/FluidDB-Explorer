@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-fluiddbexplorer
-~~~~~~~~~~~~~~~
+    fluiddbexplorer
+    ~~~~~~~~~~~~~~~
 
-:copyright: 2010 by FluidDB Explorer Authors
-:license: MIT, see LICENSE for more information
+    :copyright: 2010 by FluidDB Explorer Authors
+    :license: MIT, see LICENSE for more information
 """
 
 from flask import Flask, redirect, render_template, session, url_for
