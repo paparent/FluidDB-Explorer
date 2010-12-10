@@ -95,7 +95,7 @@ def remote(instance, action):
     elif action == 'query':
         querystr = request.form.get('query', '')
         response = fluid.values.get(querystr, ('fluiddb/about',))
-        ids = response.value['results']
+        ids = response.value['results']['id']
 
         # TODO: Actually, the results could be passed right away.
         out = []
