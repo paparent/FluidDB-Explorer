@@ -25,7 +25,8 @@ App.ObjectPanel = Ext.extend(Ext.Panel, {
 			,success: function(a){
 				json = Ext.decode(a.responseText);
 
-				txt = "Object ID: " + this.oid + "<br><br>About: " + json.value;
+				value = json.value.replace(/(http\:\/\/[\w\.\-\?\!\&\=]+)/g,'<a href="$1" target="_blank">$1</a>');
+				txt = "Object ID: " + this.oid + "<br><br>About: " + value;
 				txt += '<br><br><a href="http://abouttag.appspot.com/id/butterfly/'+this.oid+'" target="_blank">View visual representation</a>';
 				this.items.items[0].update(txt);
 				this.doLayout();
