@@ -21,7 +21,11 @@ App.ObjectPanel = Ext.extend(Ext.Panel, {
 		var panel = this;
 
 		direct.GetTagValue(this.oid, "fluiddb/about", function(json){
-			txt = "Object ID: " + panel.oid + "<br><br>About: " + json.value;
+			value = json.value;
+			if (value.match(/^https?:\/\//)) {
+				value = '<a href="' + value + '" target="_blank">' + value + '</a>';
+			}
+			txt = "Object ID: " + panel.oid + "<br><br>About: " + value;
 			txt += '<br><br><a href="http://abouttag.appspot.com/id/butterfly/'+panel.oid+'" target="_blank">View visual representation</a>';
 			panel.items.items[0].update(txt);
 			panel.doLayout();

@@ -29,13 +29,19 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 		this.columns = [
 			this.action
 			,{id:'oid', header:'Object ID', width: 230, dataIndex: 'oid', sortable: true}
-			,{header: 'About tag', width: 600, dataIndex: 'about', sortable: true}
+			,{header: 'About tag', width: 600, dataIndex: 'about', sortable: true, renderer: {fn: this.aboutTagRenderer, scope: this}}
 		];
 		this.plugins = [this.action];
 		App.ResultsGrid.superclass.initComponent.call(this);
 
 		this.doRefresh();
 		this.on('rowdblclick', this.onRowDblClick, this);
+	}
+	,aboutTagRenderer: function(value, metaData) {
+		if (value.match(/^https?:\/\//)) {
+			value = '<a href="' + value + '" target="_blank">' + value + '</a>';
+		}
+		return value;
 	}
 	,execQuery: function(a){
 		this.store.load({params: {query:a}});
