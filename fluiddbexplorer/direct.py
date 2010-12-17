@@ -46,7 +46,7 @@ def NamespacesFetch(namespace):
 @extdirect.register()
 def Query(querystr):
     response = g.fluid.values.get(querystr, ('fluiddb/about',))
-    ids = response.value['results']
+    ids = response.value['results']['id']
 
     out = []
     for objid in ids:
