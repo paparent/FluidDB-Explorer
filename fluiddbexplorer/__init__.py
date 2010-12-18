@@ -86,9 +86,9 @@ def remote(instance, action):
                                                    returnTags=True)
 
         out = []
-        for nss in response.value['namespaceNames']:
+        for nss in sorted(response.value['namespaceNames']):
             out.append({'id': path + nss, 'leaf': False, 'text': nss})
-        for tag in response.value['tagNames']:
+        for tag in sorted(response.value['tagNames']):
             out.append({'id': path + tag, 'leaf': True, 'text': tag})
         return json.dumps(out)
 
