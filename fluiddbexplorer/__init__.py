@@ -20,20 +20,6 @@ extdirect = ExtDirect(app)
 from fluiddbexplorer import direct
 
 
-INSTANCE_URL = {
-    'fluiddb': 'http://fluiddb.fluidinfo.com',
-    'sandbox': 'http://sandbox.fluidinfo.com',
-}
-
-
-def get_instance_url(instance):
-    try:
-        url = INSTANCE_URL[instance]
-    except KeyError:
-        url = 'http://' + instance
-    return url
-
-
 @app.route('/')
 def index():
     username = session.get('username', 'Anonymous')
@@ -49,6 +35,7 @@ def splash(instance):
     if username != 'Anonymous':
         return redirect(url_for('main', instance=instance, rootns=username))
     else:
+        session['instance'] = instance
         return render_template("index.html",
                                username=username,
                                rootlabel='FluidDB',
@@ -58,6 +45,7 @@ def splash(instance):
 
 @app.route('/<instance>/<path:rootns>')
 def main(instance, rootns):
+    session['instance'] = instance
     rootns = rootns.rstrip('/')
     return render_template("index.html",
                            username=session.get('username', 'Anonymous'),

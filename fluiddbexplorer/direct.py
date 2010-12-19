@@ -16,9 +16,24 @@ from fom.db import PRIMITIVE_CONTENT_TYPE
 from fluiddbexplorer import extdirect
 
 
+INSTANCE_URL = {
+    'fluiddb': 'http://fluiddb.fluidinfo.com',
+    'sandbox': 'http://sandbox.fluidinfo.com',
+}
+
+
+def get_instance_url(instance):
+    try:
+        url = INSTANCE_URL[instance]
+    except KeyError:
+        url = 'http://' + instance
+    return url
+
+
 @extdirect.app.before_request
 def setup_fluid():
-    g.fluid = Fluid()
+    instance = session.get('instance', 'fluiddb')
+    g.fluid = Fluid(get_instance_url(instance))
 
 @extdirect.before_request
 def setup_login():
