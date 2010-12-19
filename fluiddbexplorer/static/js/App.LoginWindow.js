@@ -14,7 +14,8 @@ App.LoginWindow = Ext.extend(Ext.Window, {
 			,labelAlign: 'right'
 			,labelWidth: 75
 			,frame: true
-			,url: App.Config.base_remote + 'login'
+			,api: {submit: direct.Login}
+			,paramOrder: ['username', 'password']
 			,defaultType: 'textfield'
 			,defaults: {
 				allowBlank: false
@@ -54,11 +55,7 @@ App.LoginWindow = Ext.extend(Ext.Window, {
 	,logout: function() {
 		loginWindow = this;
 		loginWindow.el.mask('Please wait...', 'x-mask-loading');
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'logout'
-			,method: 'post'
-			,success: function(){loginWindow.el.unmask();loginWindow.fireEvent('logged', 'Anonymous');}
-		});
+		direct.Logout(function(){loginWindow.el.unmask();loginWindow.fireEvent('logged', 'Anonymous');});
 	}
 });
 

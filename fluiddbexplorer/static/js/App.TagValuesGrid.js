@@ -7,8 +7,10 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,viewConfig: {emptyText: 'Nothing to display'}
 	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
-		this.store = gridstore = new Ext.data.JsonStore({
-			url: App.Config.base_remote + 'tagvaluesfetch'
+		this.store = gridstore = new Ext.data.DirectStore({
+			directFn: direct.TagValuesFetch
+			,paramsAsHash: false
+			,paramOrder: 'oid'
 			,autoDestroy: true
 			,root: 'tags'
 			,fields: ['tag', 'value', 'readonly']
@@ -61,21 +63,14 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		var tag = e.record.data.tag;
 		var value = e.value;
 
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'tagobject'
-			,params: {oid: this.oid, tag: tag, value: value}
-			,success: function(a){/*TODO:...*/}
-		});
+		direct.TagObject(this.oid, tag, value, function(){e.record.commit();});
 	}
 	,onAddTag: function(){
 		var tag = window.prompt('Please enter full tag path');
 		var value = window.prompt('Value');
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'tagobject'
-			,params: {oid: this.oid, tag: tag, value: value}
-			,success: function(a){this.store.reload();}
-			,scope: this
-		});
+
+		store = this.store;
+		direct.TagObject(this.oid, tag,  value, function(){store.reload();});
 	}
 	,onLoadAllTags: function(a){
 		this.store.each(this.setTag.createDelegate(this));
@@ -88,39 +83,28 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	}
 	,onDeleteTag: function(g, r, action, row, col){
 		r.set('value', '<em>removing tag...</em>');
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'deletetagvalue'
-			,params: {oid: this.oid, tag: r.data.tag}
-			,success: function(a){
-				g.store.remove(r);
-			}
-		});
+		direct.DeleteTagValue(this.oid, r.data.tag, function(){g.store.remove(r);});
 	}
 	,setTag: function(r){
 		r.set('value', '<em>loading...</em>');
 		oid = this.oid;
-		Ext.Ajax.request({
-			url: App.Config.base_remote + 'gettagvalue'
-			,params: {oid: oid, tag: r.data.tag}
-			,success: function(a){
-				json = Ext.decode(a.responseText);
-				if (json.type == 'primitive') {
-					value = json.value;
-				}
-				else if (json.type == 'empty') {
-					// TODO: Add color and/or icon
-					value = 'empty';
-				}
-				else if (json.type == 'opaque') {
-					value = 'Opaque value with content-type: "' + json.value + '" <a href="http://fluiddb.fluidinfo.com/objects/'+oid+'/'+r.data.tag+'" target="_blank">open</a>';
-				}
-				else {
-					value = 'Unsupported type: "' + json.type + '"';
-				}
-				r.set('value', value);
-				r.set('readonly', json.readonly);
-				r.commit();
+		direct.GetTagValue(oid, r.data.tag, function(json){
+			if (json.type == 'primitive') {
+				value = json.value;
 			}
+			else if (json.type == 'empty') {
+				// TODO: Add color and/or icon
+				value = 'empty';
+			}
+			else if (json.type == 'opaque') {
+				value = 'Opaque value with content-type: "' + json.value + '" <a href="http://fluiddb.fluidinfo.com/objects/'+oid+'/'+r.data.tag+'" target="_blank">open</a>';
+			}
+			else {
+				value = 'Unsupported type: "' + json.type + '"';
+			}
+			r.set('value', value);
+			r.set('readonly', json.readonly);
+			r.commit();
 		});
 	}
 });
