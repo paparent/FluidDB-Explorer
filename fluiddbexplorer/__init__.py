@@ -7,7 +7,7 @@
     :license: MIT, see LICENSE for more information
 """
 
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask, abort, redirect, render_template, session, url_for
 
 from flaskext.extdirect import ExtDirect
 from fluiddbexplorer import local_settings
@@ -18,6 +18,11 @@ extdirect = ExtDirect(app)
 
 
 from fluiddbexplorer import direct
+
+
+@app.route('/favicon.ico/')
+def favicon():
+    abort(404)
 
 
 @app.route('/')
