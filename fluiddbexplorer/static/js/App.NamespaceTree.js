@@ -20,7 +20,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			itemclick: function(i){
 				var node = i.parentMenu.contextNode;
 				var loader = node.getOwnerTree().getLoader();
-				var path = node.id;
+				var path = node.id.replace(/^(ns-|tag-)/, '');
 				switch (i.id) {
 				case 'ns-create-namespace':
 					var namespace = window.prompt('Namespace name');
