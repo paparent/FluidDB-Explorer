@@ -46,16 +46,17 @@ def setup_login():
 
 @extdirect.register()
 def NamespacesFetch(namespace):
+    namespace = namespace.replace('ns-', '')
     path = namespace + '/'
 
     response = g.fluid.namespaces[namespace].get(returnNamespaces=True,
-                                               returnTags=True)
+                                                 returnTags=True)
 
     out = []
     for nss in sorted(response.value['namespaceNames']):
-        out.append({'id': path + nss, 'leaf': False, 'text': nss})
+        out.append({'id': 'ns-' + path + nss, 'leaf': False, 'text': nss})
     for tag in sorted(response.value['tagNames']):
-        out.append({'id': path + tag, 'leaf': True, 'text': tag})
+        out.append({'id': 'tag-' + path + tag, 'leaf': True, 'text': tag})
     return out
 
 @extdirect.register()

@@ -104,7 +104,7 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 		if (a.id == 'root' || !a.attributes.leaf) {
 			return;
 		}
-		this.fireEvent('tagclick', a.id);
+		this.fireEvent('tagclick', a.id.replace(/^tag-/, ''));
 	}
 	,onCtxMenu: function(n, e){
 		n.select();
