@@ -97,7 +97,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				value = 'empty';
 			}
 			else if (json.type == 'opaque') {
-				value = 'Opaque value with content-type: "' + json.value + '" <a href="http://fluiddb.fluidinfo.com/objects/'+oid+'/'+r.data.tag+'" target="_blank">open</a>';
+				value = 'Opaque value with content-type: "' + json.value + '" <a href="http://' + App.Config.baseurl_instance + '/objects/'+oid+'/'+r.data.tag+'" target="_blank">open</a>';
 			}
 			else {
 				value = 'Unsupported type: "' + json.type + '"';

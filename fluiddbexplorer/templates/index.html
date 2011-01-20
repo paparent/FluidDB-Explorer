@@ -66,6 +66,7 @@ var _gaq=_gaq||[];_gaq.push(['_setAccount','{{ config.GOOGLE_ANALYTICS_CODE }}']
 	App.Config.username = "{{ username }}";
 	App.Config.rootlabel = "{{ rootlabel }}";
 	App.Config.rootid = "{{ rootid }}";
+	App.Config.baseurl_instance = "{{ instance }}.fluidinfo.com";
 {% if config.GOOGLE_ANALYTICS_CODE %}
 	Ext.Ajax.on('requestcomplete', function(c, r, o){
 		_gaq.push(['_trackPageview', o.url]);
