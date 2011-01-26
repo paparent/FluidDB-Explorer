@@ -69,6 +69,19 @@ Ext.onReady(function() {
 		mainPanel.setActiveTab(t);
 	});
 
+	sidePanel.on('openobject', function(path, type){
+		if (type == 'ns') {
+			abouttag = 'Object for the namespace ' + path;
+		}
+		else {
+			abouttag = 'Object for the attribute ' + path;
+		}
+
+		direct.AboutToID(abouttag, function(oid){
+			Ext.getCmp('mainpanel').openObject(oid);
+		});
+	});
+
 	query.on('query', function(q){
 		openResultsGrid(q);
 	});

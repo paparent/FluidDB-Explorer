@@ -175,6 +175,10 @@ def SetPerm(type, action, path, policy, exceptions):
                                                policy,
                                                exceptions)
 
+@extdirect.register()
+def AboutToID(about):
+    return g.fluid.about[about].get().value['id']
+
 @extdirect.register(flags={'formHandler': True})
 def Login(username, password):
     session['logged'] = True

@@ -6,7 +6,12 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 	,title: 'Namespaces'
 	,root: {nodeType: 'async', text: App.Config.rootlabel, id: App.Config.rootid, draggable: false}
 	,initComponent: function(){
-		this.addEvents('tagclick');
+		this.addEvents({
+			'tagclick': true
+			,'permission': true
+			,'openobject': true
+		});
+
 		this.loader = new Ext.tree.TreeLoader({
 			directFn: direct.NamespacesFetch
 		});
@@ -88,7 +93,9 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			if (!this.ctxMenuTag) {
 				this.ctxMenuTag = new Ext.menu.Menu({
 					items: [
-						{id: 'ns-delete-tag', text: 'Delete tag'}
+						{id: 'ns-openobject', text: 'Open object'}
+						,'-'
+						,{id: 'ns-delete-tag', text: 'Delete tag'}
 						,'-'
 						,{id: 'ns-permission', text: 'Permissions'}
 					]
@@ -104,7 +111,9 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			if (!this.ctxMenuNS) {
 				this.ctxMenuNS = new Ext.menu.Menu({
 					items: [
-						{id: 'ns-create-namespace', text: 'Create new namespace'}
+						{id: 'ns-openobject', text: 'Open object'}
+						,'-'
+						,{id: 'ns-create-namespace', text: 'Create new namespace'}
 						,{id: 'ns-delete-namespace', text: 'Delete namespace'}
 						,'-'
 						,{id: 'ns-create-tag', text: 'Create new tag'}
@@ -147,6 +156,9 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			break;
 		case 'ns-permission':
 			node.getOwnerTree().fireEvent('permission', path, node.leaf?'tag':'ns');
+			break;
+		case 'ns-openobject':
+			node.getOwnerTree().fireEvent('openobject', path, node.leaf?'tag':'ns');
 			break;
 		}
 	}
