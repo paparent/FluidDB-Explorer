@@ -5,48 +5,6 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 	,border: false
 	,title: 'Namespaces'
 	,root: {nodeType: 'async', text: App.Config.rootlabel, id: App.Config.rootid, draggable: false}
-	,contextMenu: new Ext.menu.Menu({
-		items: [
-			{id: 'ns-create-namespace', text: 'Create new namespace'}
-			,{id: 'ns-delete-namespace', text: 'Delete namespace'}
-			,'-'
-			,{id: 'ns-create-tag', text: 'Create new tag'}
-			,{id: 'ns-delete-tag', text: 'Delete tag'}
-			,'-'
-			,{id: 'ns-permission', text: 'Permissions'}
-
-		]
-		,listeners: {
-			itemclick: function(i){
-				var node = i.parentMenu.contextNode;
-				var loader = node.getOwnerTree().getLoader();
-				var path = node.id.replace(/^(ns-|tag-)/, '');
-				switch (i.id) {
-				case 'ns-create-namespace':
-					var namespace = window.prompt('Namespace name');
-					var desc = window.prompt('Description');
-					direct.CreateNamespace(path, namespace, desc, function(){loader.load(node,function(){node.expand();});});
-					break;
-				case 'ns-delete-namespace':
-					parentNode = node.parentNode;
-					direct.DeleteNamespace(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
-					break;
-				case 'ns-create-tag':
-					var tag = window.prompt('Tag name');
-					var desc = window.prompt('Description');
-					direct.CreateTag(path, tag, desc, function(){loader.load(node,function(){node.expand();});});
-					break;
-				case 'ns-delete-tag':
-					parentNode = node.parentNode;
-					direct.DeleteTag(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
-					break;
-				case 'ns-permission':
-					node.getOwnerTree().fireEvent('permission', path, node.leaf?'tag':'ns');
-					break;
-				}
-			}
-		}
-	})
 	,initComponent: function(){
 		this.addEvents('tagclick');
 		this.loader = new Ext.tree.TreeLoader({
@@ -122,27 +80,75 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 		}
 		this.fireEvent('tagclick', a.id.replace(/^tag-/, ''));
 	}
-	,onCtxMenu: function(n, e){
-		n.select();
-		var c = n.getOwnerTree().contextMenu;
-		c.contextNode = n;
+	,onCtxMenu: function(node, e){
+		node.select();
 
-		if (n.leaf) {
+		if (node.leaf) {
 			// Tag
-			c.findById('ns-create-tag').disable();
-			c.findById('ns-create-namespace').disable();
-			c.findById('ns-delete-tag').enable();
-			c.findById('ns-delete-namespace').disable();
+			if (!this.ctxMenuTag) {
+				this.ctxMenuTag = new Ext.menu.Menu({
+					items: [
+						{id: 'ns-delete-tag', text: 'Delete tag'}
+						,'-'
+						,{id: 'ns-permission', text: 'Permissions'}
+					]
+					,listeners: {itemclick: this.ctxMenuHandler}
+				});
+			}
+
+			this.ctxMenuTag.contextNode = node;
+			ctxMenu = this.ctxMenuTag;
 		}
 		else {
 			// Namespace
-			c.findById('ns-create-tag').enable();
-			c.findById('ns-create-namespace').enable();
-			c.findById('ns-delete-tag').disable();
-			c.findById('ns-delete-namespace').enable();
+			if (!this.ctxMenuNS) {
+				this.ctxMenuNS = new Ext.menu.Menu({
+					items: [
+						{id: 'ns-create-namespace', text: 'Create new namespace'}
+						,{id: 'ns-delete-namespace', text: 'Delete namespace'}
+						,'-'
+						,{id: 'ns-create-tag', text: 'Create new tag'}
+						,'-'
+						,{id: 'ns-permission', text: 'Permissions'}
+
+					]
+					,listeners: {itemclick: this.ctxMenuHandler}
+				});
+			}
+
+			this.ctxMenuNS.contextNode = node;
+			ctxMenu = this.ctxMenuNS;
 		}
 
-		c.showAt(e.getXY());
+		ctxMenu.showAt(e.getXY());
+	}
+	,ctxMenuHandler: function(i){
+		var node = i.parentMenu.contextNode;
+		var loader = node.getOwnerTree().getLoader();
+		var path = node.id.replace(/^(ns-|tag-)/, '');
+		switch (i.id) {
+		case 'ns-create-namespace':
+			var namespace = window.prompt('Namespace name');
+			var desc = window.prompt('Description');
+			direct.CreateNamespace(path, namespace, desc, function(){loader.load(node,function(){node.expand();});});
+			break;
+		case 'ns-delete-namespace':
+			parentNode = node.parentNode;
+			direct.DeleteNamespace(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
+			break;
+		case 'ns-create-tag':
+			var tag = window.prompt('Tag name');
+			var desc = window.prompt('Description');
+			direct.CreateTag(path, tag, desc, function(){loader.load(node,function(){node.expand();});});
+			break;
+		case 'ns-delete-tag':
+			parentNode = node.parentNode;
+			direct.DeleteTag(path, function(){loader.load(parentNode,function(){parentNode.expand();});});
+			break;
+		case 'ns-permission':
+			node.getOwnerTree().fireEvent('permission', path, node.leaf?'tag':'ns');
+			break;
+		}
 	}
 });
 
