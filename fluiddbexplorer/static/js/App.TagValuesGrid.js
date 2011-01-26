@@ -34,7 +34,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			columns: [
 				this.action
 				,{id:'tag', header:'Tag', width: 230, dataIndex: 'tag', sortable: true}
-				,{header: 'Value', width: 600, dataIndex: 'value', sortable: true, editor: {xtype: 'textfield'}}
+				,{header: 'Value', width: 600, dataIndex: 'value', sortable: true, renderer: {fn: this.aboutTagRenderer, scope: this}, editor: {xtype: 'textfield'}}
 			]
 			,isCellEditable: function(col, row) {
 				var record = gridstore.getAt(row);
@@ -106,6 +106,12 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			r.set('readonly', json.readonly);
 			r.commit();
 		});
+	}
+	,aboutTagRenderer: function(value, metaData) {
+		if (value.match(/^https?:\/\//)) {
+			value = '<a href="' + value + '" target="_blank">' + value + '</a>';
+		}
+		return value;
 	}
 });
 
