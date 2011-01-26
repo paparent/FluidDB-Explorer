@@ -82,9 +82,25 @@ App.NamespacesTree = Ext.extend(Ext.tree.TreePanel, {
 			})
 		];
 
+		this.tools = [
+			{id: 'gear', qtip: 'Change top-level namespace',  handler: this.changeTopLevelNS}
+		];
+
 		App.NamespacesTree.superclass.initComponent.call(this);
 		this.on('click', this.nodeClick, this);
 		this.on('contextmenu', this.onCtxMenu, this);
+	}
+	,changeTopLevelNS: function(e, toolEl, panel, tc) {
+		Ext.Msg.prompt('Top level Namespace', 'Please enter the path of the new namespace', function(btn, text){
+			if (btn == 'ok') {
+				App.Config.rootid = text;
+				rootnode = panel.getRootNode();
+				rootnode.setId(text);
+				rootnode.setText(text);
+				panel.getLoader().load(rootnode);
+				rootnode.expand();
+			}
+		});
 	}
 	,filterTree: function(t, e) {
 		var text = t.getValue();
