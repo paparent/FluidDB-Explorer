@@ -1,6 +1,6 @@
 Flask==0.6
 Flask-ExtDirect==0.1
-Fom==0.9
+Fom==0.9.2
 gunicorn==0.11.2
 httplib2==0.6.0
 Jinja2==2.5.5
