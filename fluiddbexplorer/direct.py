@@ -61,21 +61,26 @@ def NamespacesFetch(namespace):
 
 @extdirect.register()
 def Query(querystr):
-    response = g.fluid.values.get(querystr, ('fluiddb/about',))
-    ids = response.value['results']['id']
+    response = g.fluid.objects.get(querystr)
+    ids = response.value['ids']
 
     out = []
     k = 0
     limit = extdirect.app.config.get('QUERY_RESULTSET_LIMIT', 0)
+    limit_abouttag = extdirect.app.config.get('QUERY_ABOUTTAG_LIMIT', 0)
+    showAbout = False if len(ids) > limit_abouttag else True
 
     for objid in ids:
         k = k + 1
         if k == limit:
             break
-        try:
-            about = ids[objid]['fluiddb/about']['value']
-        except KeyError:
-            about = 'no about tag'
+        if showAbout:
+            try:
+                about = g.fluid.objects[objid]['fluiddb/about'].get().value
+            except:
+                about = 'no about tag'
+        else:
+            about = 'too many objects (more than %i) to fetch about tag' % (limit_abouttag,)
         out.append({'oid': objid, 'about': about})
     return {'ids': out}
 
