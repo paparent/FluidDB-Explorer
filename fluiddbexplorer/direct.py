@@ -65,7 +65,13 @@ def Query(querystr):
     ids = response.value['results']['id']
 
     out = []
+    k = 0
+    limit = extdirect.app.config.get('QUERY_RESULTSET_LIMIT', 0)
+
     for objid in ids:
+        k = k + 1
+        if k == limit:
+            break
         try:
             about = ids[objid]['fluiddb/about']['value']
         except KeyError:
