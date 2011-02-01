@@ -27,3 +27,5 @@ h1{font:bold 16px tahoma,arial,sans-serif;color:white;margin:0;padding-left:5px;
 #namespacestree .x-tree-node-leaf .x-tree-node-icon{background-image:url(../images/icons/tag_blue.png)!important;}
 
 .ux-mif{background-color:#fff;}
+
+.x-grid3-row td,.x-grid3-summary-row td,.x-grid3-cell-text,.x-grid3-hd-text,.x-grid3-hd,.x-grid3-row{-moz-user-select:inherit;-khtml-user-select:text;}
