@@ -5,8 +5,8 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,loadMask: true
 	,oid: null
 	,viewConfig: {emptyText: 'Nothing to display'}
-	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
+		this.sm = new Ext.grid.RowSelectionModel({singleSelect:true});
 		this.store = gridstore = new Ext.data.DirectStore({
 			directFn: direct.TagValuesFetch
 			,paramsAsHash: false
