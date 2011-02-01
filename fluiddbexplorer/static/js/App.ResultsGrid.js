@@ -6,8 +6,8 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 	,query: null
 	,iconCls: 'icon-tab-results'
 	,viewConfig: {emptyText: 'Nothing to display'}
-	,sm: new Ext.grid.RowSelectionModel({singleSelect:true})
 	,initComponent: function(){
+		this.sm = new Ext.grid.RowSelectionModel({singleSelect:true});
 		this.store = new Ext.data.DirectStore({
 			directFn: direct.Query
 			,paramsAsHash: false
@@ -52,8 +52,8 @@ App.ResultsGrid = Ext.extend(Ext.grid.GridPanel, {
 			this.execQuery(this.query);
 		}
 	}
-	,onRowDblClick: function(a, b, c){
-		var row = a.getSelectionModel().getSelected();
+	,onRowDblClick: function(grid, rowIndex, e){
+		var row = grid.store.getAt(rowIndex);
 		var oid = row.data.oid;
 		Ext.getCmp('mainpanel').openObject(oid);
 	}
