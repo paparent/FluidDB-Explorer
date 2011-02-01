@@ -91,6 +91,11 @@ Ext.onReady(function() {
 		json = Ext.util.JSON.decode(response.responseText);
 		Ext.Msg.alert('Error from FluidDB', json.msg);
 	});
+
+	Ext.Direct.on('exception', function(e){
+		var msg = e.message.replace(/</g, "&lt;");
+		Ext.Msg.alert('Error from FluidDB', msg);
+	});
 });
 
 Ext.util.base64 = {
