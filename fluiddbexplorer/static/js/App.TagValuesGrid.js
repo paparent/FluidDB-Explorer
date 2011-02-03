@@ -34,7 +34,7 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			columns: [
 				this.action
 				,{id:'tag', header:'Tag', width: 230, dataIndex: 'tag', sortable: true}
-				,{header: 'Value', width: 600, dataIndex: 'value', sortable: true, renderer: {fn: this.aboutTagRenderer, scope: this}, editor: {xtype: 'textfield'}}
+				,{header: 'Value', width: 600, dataIndex: 'value', sortable: true, renderer: {fn: this.valueRenderer, scope: this}, editor: {xtype: 'textfield'}}
 			]
 			,isCellEditable: function(col, row) {
 				var record = gridstore.getAt(row);
@@ -58,6 +58,8 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		}
 
 		this.on('afteredit', this.onAfterEdit, this);
+
+		this.body.on('click', this.onClick, this);
 	}
 	,onAfterEdit: function(e){
 		var tag = e.record.data.tag;
@@ -107,11 +109,20 @@ App.TagValuesGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			r.commit();
 		});
 	}
-	,aboutTagRenderer: function(value, metaData) {
+	,valueRenderer: function(value, metaData) {
 		if (value.match(/^https?:\/\//)) {
-			value = '<a href="' + value + '" target="_blank">' + value + '</a>';
+			return '<a href="' + value + '" target="_blank">' + value + '</a>';
 		}
+
+		value = value.replace(/(([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12})/g, '<a href="" expl:objectid="$1" class="openobject">$1</a>');
 		return value;
+	}
+	,onClick: function(e, target) {
+		if (target = e.getTarget('.openobject', 2)) {
+			e.stopEvent();
+			objid = Ext.fly(target).getAttributeNS('expl', 'objectid');
+			Ext.getCmp('mainpanel').openObject(objid);
+		}
 	}
 });
 
